@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "server",
+]
+
+workspace.resolver = "2"
+
+
+[profile.bench]
+lto = "fat"

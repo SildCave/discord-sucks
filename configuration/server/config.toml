@@ -1,0 +1,13 @@
+[server]
+host = "172.16.0.4"
+port = 4443
+pem_cert_path = "configuration/server/ssl/cert.pem"
+pem_key_path = "configuration/server/ssl/.key"
+
+[database]
+username = "db_client"
+password_file_path = "configuration/mongodb/mongodb_client_pass.txt"
+pem_cert_path = "configuration/mongodb/ssl/mongodb.pem"
+source_db = "data"
+host = "127.0.0.1"
+port = 27017

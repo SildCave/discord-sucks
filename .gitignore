@@ -1,0 +1,5 @@
+configuration/server/ssl/*
+configuration/mongodb/ssl/*
+configuration/mongodb/mongodb_admin_pass.txt
+configuration/mongodb/mongodb_client_pass.txt
+target/
