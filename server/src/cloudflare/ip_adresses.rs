@@ -69,7 +69,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_cloudflare_api() {
-        let cloudflare_ips = CloudflareIpAddresses::new_from_cloudflare_api().await;
+        let cloudflare_ips = CloudflareIpAddresses::new_from_cloudflare_api().await.unwrap();
         assert!(cloudflare_ips.addresses.len() > 0);
     }
 
@@ -85,7 +85,7 @@ mod tests {
     #[bench]
     fn bench_is_cloudflare_ip(b: &mut test::Bencher) {
         let runtime = tokio::runtime::Runtime::new().unwrap();
-        let cloudflare_ips = runtime.block_on(CloudflareIpAddresses::new_from_cloudflare_api());
+        let cloudflare_ips = runtime.block_on(CloudflareIpAddresses::new_from_cloudflare_api()).unwrap();
         let test_ips: Ipv4Network = "0.0.0.0/0".parse().unwrap();
         let mut test_ips = test_ips.iter().collect::<Vec<Ipv4Addr>>();
 
