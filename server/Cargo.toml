@@ -20,4 +20,5 @@ anyhow = "1.0.86"
 axum-client-ip = "0.6.0"
 ipnetwork = { git = "https://github.com/SildCave/ipnetwork" }
 reqwest = { version = "0.12.7", features = ["blocking"] }
-axum-prometheus = "0.7.0"   
+metrics = "0.23.0"
+metrics-exporter-prometheus = "0.15.3"

@@ -1,4 +1,4 @@
 mod setup;
-mod metrics;
+pub mod metrics;
 
 pub use setup::setup_logging;

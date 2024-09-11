@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     pub server: ServerConfig,
+    pub metrics_server: MetricsServerConfig,
     pub database: DatabaseConfig,
 }
 
@@ -15,6 +16,13 @@ pub struct ServerConfig {
     pub pem_cert_path: String,
     pub pem_key_path: String,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MetricsServerConfig {
+    pub host: String,
+    pub port: u16,
+}
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DatabaseConfig {
