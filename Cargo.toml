@@ -8,3 +8,7 @@ workspace.resolver = "2"
 
 [profile.bench]
 lto = "fat"
+
+
+[profile.release]
+lto = "fat"
