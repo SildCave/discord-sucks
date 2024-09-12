@@ -1,6 +1,7 @@
 #![feature(test)]
 
 
+use auth::JWTKeys;
 use axum::{
     middleware, Router
 };
@@ -26,6 +27,7 @@ mod configuration;
 mod logs;
 mod cloudflare;
 mod routes;
+mod auth;
 
 use axum_client_ip::SecureClientIpSource;
 
@@ -39,6 +41,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cloudflare_ips = cloudflare::CloudflareIpAddresses::new_from_cloudflare_api().await;
     let cloudflare_ips = Arc::new(RwLock::new(cloudflare_ips?));
     let assets_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets");
+
+    let jwt_keys = JWTKeys::new(&config)?;
 
     let db_client = database::prepare_mongodb_client(
         config.database.username,
@@ -54,10 +58,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let trace_layer = TraceLayer::new_for_http()
         .make_span_with(DefaultMakeSpan::default().include_headers(true));
-    let app = configure_routes().await;
+    let app = configure_routes(
+        jwt_keys
+    ).await;
     let app = app
         .fallback_service(ServeDir::new(assets_dir).append_index_html_on_directories(true))
-        // logging so we can see whats going on
         .route_layer(
             middleware::from_fn(
                 logs::metrics::track_metrics

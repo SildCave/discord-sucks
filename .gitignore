@@ -2,4 +2,5 @@ configuration/server/ssl/*
 configuration/mongodb/ssl/*
 configuration/mongodb/mongodb_admin_pass.txt
 configuration/mongodb/mongodb_client_pass.txt
+configuration/server/jwt_secret.txt
 target/

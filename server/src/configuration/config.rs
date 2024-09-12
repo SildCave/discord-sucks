@@ -2,6 +2,8 @@ use anyhow::Result;
 
 use serde::{Deserialize, Serialize};
 
+use crate::auth::JWTKeys;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     pub server: ServerConfig,
@@ -15,6 +17,7 @@ pub struct ServerConfig {
     pub port: u16,
     pub pem_cert_path: String,
     pub pem_key_path: String,
+    pub jwt_secret_path: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -3,6 +3,7 @@ host = "172.16.0.4"
 port = 4443
 pem_cert_path = "configuration/server/ssl/cert.pem"
 pem_key_path = "configuration/server/ssl/.key"
+jwt_secret_path = "configuration/server/jwt_secret.txt"
 
 [metrics_server]
 host = "172.16.0.4"
