@@ -14,21 +14,27 @@ pub struct CloudflareIpAddresses {
 }
 
 impl CloudflareIpAddresses {
-    pub fn new(
-        ranges: Vec<String>,
-    ) -> Self {
-        let mut ip_addresses = HashSet::new();
-        for range in ranges {
-            let network: Ipv4Network = range.parse().unwrap();
-            for ip in network.iter() {
-                ip_addresses.insert(IpAddr::V4(ip));
-            }
-        }
+
+    pub fn new(ranges: Vec<String>) -> Self {
+        let ip_addresses: HashSet<IpAddr> = ranges
+            .iter()
+            .flat_map(|range| {
+                let range: Ipv4Network = range.parse().unwrap();
+                range.iter().map(|ip| IpAddr::V4(ip)).collect::<Vec<IpAddr>>()
+            })
+            .collect();
         info!("Added {} Cloudflare IP addresses", ip_addresses.len());
         Self {
             addresses: ip_addresses,
         }
     }
+
+    pub async fn new_non_blocking(ranges: Vec<String>) -> Self {
+        tokio::task::spawn_blocking(move || {
+            Self::new(ranges)
+        }).await.unwrap()
+    }
+
 
     pub async fn new_from_cloudflare_api() -> Result<Self> {
         let url = "https://www.cloudflare.com/ips-v4/";
@@ -46,7 +52,7 @@ impl CloudflareIpAddresses {
             }
         };
         let ranges: Vec<String> = response?.text().await?.lines().map(|s| s.to_string()).collect();
-        Ok(Self::new(ranges))
+        Ok(Self::new_non_blocking(ranges).await)
     }
 
     pub fn is_cloudflare_ip(&self, ip: impl Into<IpAddr>) -> bool {
@@ -59,7 +65,7 @@ impl CloudflareIpAddresses {
 mod tests {
     extern crate test;
     use super::*;
-    use std::net::Ipv4Addr;
+    use std::{net::Ipv4Addr, time::Instant};
     #[test]
     fn test_ipv4_generation() {
         let ranges = vec!["173.245.48.0/20".to_string(), "141.101.64.0/18".to_string(), "104.16.0.0/13".to_string()];
@@ -80,6 +86,35 @@ mod tests {
         assert!(cloudflare_ips.is_cloudflare_ip(IpAddr::V4(Ipv4Addr::new(173, 245, 48, 0))));
     }
 
+    #[tokio::test]
+    async fn bench_blocking_element_of_generating_cloudflare_ips() {
+        let url = "https://www.cloudflare.com/ips-v4/";
+        let response = reqwest::get(url).await;
+        match response {
+            Ok(ref response) => {
+                if !response.status().is_success() {
+                    error!("Failed to fetch Cloudflare IP addresses from Cloudflare API: {}", response.status());
+                } else {
+                    info!("Fetched Cloudflare IP addresses from Cloudflare API");
+                }
+            }
+            Err(ref e) => {
+                error!("Failed to fetch Cloudflare IP addresses from Cloudflare API: {}", e);
+            }
+        };
+        let text = response.unwrap().text().await;
+        let ranges: Vec<String> = text.unwrap().lines().map(|s| s.to_string()).collect();
+
+        let start = Instant::now();
+        let tests = 120;
+        for _ in 0..tests {
+            CloudflareIpAddresses::new(ranges.clone());
+        }
+        let duration = start.elapsed();
+        println!("Time to generate {} Cloudflare IP addresses: {:?}", tests, duration);
+        println!("Average time to generate Cloudflare IP addresses: {:?}", duration / tests);
+
+    }
 
     // WARNING: This benchmark takes up ~16gb of ram
     #[bench]

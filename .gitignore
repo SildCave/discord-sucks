@@ -4,3 +4,4 @@ configuration/mongodb/mongodb_admin_pass.txt
 configuration/mongodb/mongodb_client_pass.txt
 configuration/server/jwt_secret.txt
 target/
+configuration/redis/data/*

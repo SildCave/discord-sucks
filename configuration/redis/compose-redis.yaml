@@ -1,11 +1,13 @@
-version: '3.8'
+version: "3.6"
+
 services:
-  cache:
-    image: redis:6.2-alpine
-    restart: always
+  redis:
+    image: redis/redis-stack-server:7.2.0-v6
     ports:
-      - '6379:6379'
-    command: redis-server --save 20 1 --loglevel warning --requirepass tydcgvhkascvHKGVCyuJGVKasdJVcdUTVYCIOGYsdc
+      - 6379:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
     volumes:
       - ./data:/data
       - ./local-redis-stack.conf:/redis-stack.conf
+

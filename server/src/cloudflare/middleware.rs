@@ -25,17 +25,30 @@ use std::{
 
 use crate::cloudflare::CloudflareIpAddresses;
 
+#[derive(Clone)]
+pub struct CloudflareValidationState {
+    pub cloudflare_ips: Arc<RwLock<CloudflareIpAddresses>>,
+    pub allow_non_cloudflare_ips: bool,
+}
+
 pub async fn cloudflare_validation_middleware(
-    State(cloudflare_ips): State<Arc<RwLock<CloudflareIpAddresses>>>,
+    State(cloudflare_validation_state): State<CloudflareValidationState>,
     connection_info: ConnectInfo<SocketAddr>,
     request: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    let cloudflare_ips = &cloudflare_validation_state.cloudflare_ips;
     let ip = connection_info.ip();
     let cloudflare_ips = cloudflare_ips.read().await;
     trace!("Request from IP: {}", ip);
+    
     if cloudflare_ips.is_cloudflare_ip(ip) {
         trace!("Request from Cloudflare IP: {}", ip);
+        drop(cloudflare_ips);
+        let response = next.run(request).await;
+        return Ok(response);
+    } else if cloudflare_validation_state.allow_non_cloudflare_ips {
+        trace!("Request from non-Cloudflare IP: {}, but allowed", ip);
         drop(cloudflare_ips);
         let response = next.run(request).await;
         return Ok(response);

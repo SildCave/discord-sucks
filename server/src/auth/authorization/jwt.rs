@@ -1,4 +1,3 @@
-use std::fmt::Display;
 
 use axum_extra::{
     headers::{authorization::Bearer, Authorization},
@@ -75,6 +74,5 @@ impl FromRequestParts<JWTKeys> for Claims
 pub struct Claims {
     pub iat: u64,
     pub exp: u64,
-    
 }
 

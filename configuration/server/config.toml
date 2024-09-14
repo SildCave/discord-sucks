@@ -1,6 +1,9 @@
 [server]
 host = "172.16.0.4"
 port = 4443
+enable_https = false
+allow_non_cloudflare_ips = true
+cloudflare_ips_refresh_interval_s = 300
 pem_cert_path = "configuration/server/ssl/cert.pem"
 pem_key_path = "configuration/server/ssl/.key"
 jwt_secret_path = "configuration/server/jwt_secret.txt"
@@ -10,7 +13,7 @@ host = "172.16.0.4"
 port = 3001
 
 
-[database]
+[mongo_database]
 username = "db_client"
 password_file_path = "configuration/mongodb/mongodb_client_pass.txt"
 pem_cert_path = "configuration/mongodb/ssl/mongodb.pem"
