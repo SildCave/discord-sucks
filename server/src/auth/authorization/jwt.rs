@@ -49,13 +49,14 @@ impl FromRequestParts<JWTKeys> for Claims
 {
     type Rejection = AuthError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &JWTKeys) -> Result<Self, Self::Rejection> {
-        // Extract the token from the authorization header
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &JWTKeys
+    ) -> Result<Self, Self::Rejection> {
         let TypedHeader(Authorization(bearer)) = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
             .map_err(|_| AuthError::InvalidToken)?;
-        // Decode the user data
         let decoding_key = &state.decoding;
 
         let token_data = decode::<Claims>(bearer.token(), decoding_key, &Validation::default())

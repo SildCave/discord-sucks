@@ -3,7 +3,8 @@ host = "172.16.0.4"
 port = 4443
 enable_https = false
 allow_non_cloudflare_ips = true
-cloudflare_ips_refresh_interval_s = 300
+cloudflare_ips_refresh_interval_s = 5
+cloudflare_ips_refresh_interval_jitter_s = 10
 pem_cert_path = "configuration/server/ssl/cert.pem"
 pem_key_path = "configuration/server/ssl/.key"
 jwt_secret_path = "configuration/server/jwt_secret.txt"
@@ -13,10 +14,14 @@ host = "172.16.0.4"
 port = 3001
 
 
-[mongo_database]
-username = "db_client"
-password_file_path = "configuration/mongodb/mongodb_client_pass.txt"
-pem_cert_path = "configuration/mongodb/ssl/mongodb.pem"
-source_db = "data"
+[postgres_database]
+username = "admin"
+password = "password123"
 host = "127.0.0.1"
-port = 27017
+port = 5432
+database_name = "discord_sucks"
+max_connections = 10
+
+[redis_database]
+host = "127.0.0.1"
+port = 6379

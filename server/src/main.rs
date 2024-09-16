@@ -8,9 +8,15 @@ use cloudflare::cloudflare_validation_middleware;
 use reqwest::Method;
 use routes::configure_routes;
 use tokio::sync::RwLock;
+use tracing::info;
 
 
-use std::{net::SocketAddr, path::PathBuf, sync::Arc};
+use std::{
+    net::SocketAddr,
+    path::PathBuf,
+    sync::Arc,
+    time::Duration
+};
 use tower_http::{
     cors::{
         Any, CorsLayer,
@@ -27,6 +33,7 @@ mod logs;
 mod cloudflare;
 mod routes;
 mod auth;
+mod objects;
 
 use server::{
     start_main_server,
@@ -51,11 +58,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let jwt_keys = JWTKeys::new(&config)?;
 
-    let db_client = database::prepare_mongodb_client(
-        config.mongo_database.username,
-        config.mongo_database.password.unwrap(),
-        config.mongo_database.source_db,
-    )?;
+    info!("Connecting to databases");
+    let db_client = database::DatabaseClientWithCaching::new(
+        &config.redis_database,
+        &config.postgres_database
+    ).await?;
+
+
 
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
@@ -103,8 +112,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-
-
     let server_addr = SocketAddr::new(
         config.server.host.parse().unwrap(),
         config.server.port,
@@ -126,7 +133,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             metrics_server_addr
         ), cloudflare::cloudflare_ip_refresh_cron_job(
             cloudflare_ips,
-            std::time::Duration::from_secs(config.server.cloudflare_ips_refresh_interval_s.unwrap_or(60) as u64)
+            Duration::from_secs(config.server.cloudflare_ips_refresh_interval_s.unwrap_or(3600 * 24)),
+            Duration::from_secs(config.server.cloudflare_ips_refresh_interval_jitter_s.unwrap_or(3600))
         )
     );
     Ok(())

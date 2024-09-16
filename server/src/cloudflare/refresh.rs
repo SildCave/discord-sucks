@@ -1,5 +1,6 @@
 use std::{sync::Arc, time::{Duration, Instant}};
 
+use rand::Rng;
 use tokio::sync::RwLock;
 use tracing::{error, info};
 
@@ -10,6 +11,7 @@ use super::CloudflareIpAddresses;
 pub async fn cloudflare_ip_refresh_cron_job(
     cloudflare_ip_addresses: Arc<RwLock<CloudflareIpAddresses>>,
     interval: Duration,
+    interval_jitter: Duration,
 ) {
     tokio::time::sleep(
         Duration::from_secs(10)
@@ -30,5 +32,9 @@ pub async fn cloudflare_ip_refresh_cron_job(
             }
         }
         tokio::time::sleep(interval).await;
+        let random = rand::thread_rng().gen_range(0..interval_jitter.as_secs());
+        tokio::time::sleep(
+            Duration::from_secs(random)
+        ).await;
     }
 }

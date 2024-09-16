@@ -9,5 +9,4 @@ services:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
     volumes:
       - ./data:/data
-      - ./local-redis-stack.conf:/redis-stack.conf
 

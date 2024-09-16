@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Add down migration script here\n\nCREATE TABLE\n    IF NOT EXISTS messages (\n        id BIGINT PRIMARY KEY NOT NULL UNIQUE,\n        content TEXT NOT NULL,\n        author_id INT NOT NULL,\n        channel_id INT NOT NULL,\n        created_at BIGINT,\n        updated_at BIGINT\n    );  ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "e736c4c43ef9110916d95167951bddee611c94c9f7c89daffa438704abe7815c"
+}
