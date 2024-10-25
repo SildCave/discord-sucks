@@ -31,3 +31,6 @@ scrape_configs:
   - job_name: axum_server
     static_configs:
       - targets: ["172.16.0.4:3001"]
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8899']

@@ -1,13 +1,15 @@
 use anyhow::Result;
 
+use axum::extract::FromRef;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     pub server: ServerConfig,
-    pub metrics_server: MetricsServerConfig,
     pub postgres_database: PostgresDatabaseConfig,
     pub redis_database: RedisDatabaseConfig,
+    #[serde(rename = "jwt")]
+    pub jwt_config: JWTConfig,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -20,15 +22,14 @@ pub struct ServerConfig {
     pub cloudflare_ips_refresh_interval_jitter_s: Option<u64>,
     pub pem_cert_path: Option<String>,
     pub pem_key_path: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct JWTConfig {
     pub jwt_secret_path: String,
+    pub refresh_key_lifetime_s: i64,
+    pub access_key_lifetime_s: i64,
 }
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct MetricsServerConfig {
-    pub host: String,
-    pub port: u16,
-}
-
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PostgresDatabaseConfig {

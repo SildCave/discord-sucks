@@ -7,11 +7,11 @@ cloudflare_ips_refresh_interval_s = 5
 cloudflare_ips_refresh_interval_jitter_s = 10
 pem_cert_path = "configuration/server/ssl/cert.pem"
 pem_key_path = "configuration/server/ssl/.key"
-jwt_secret_path = "configuration/server/jwt_secret.txt"
 
-[metrics_server]
-host = "172.16.0.4"
-port = 3001
+[jwt]
+refresh_key_lifetime_s = 1000
+access_key_lifetime_s = 300
+jwt_secret_path = "configuration/server/jwt_secret.txt"
 
 
 [postgres_database]

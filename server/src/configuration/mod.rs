@@ -3,7 +3,7 @@ mod config;
 pub use config::{
     Config,
     ServerConfig,
-    MetricsServerConfig,
+    JWTConfig,
     PostgresDatabaseConfig,
     RedisDatabaseConfig,
 };

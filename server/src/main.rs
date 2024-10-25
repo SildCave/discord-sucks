@@ -1,5 +1,5 @@
 #![feature(test)]
-
+#![feature(trivial_bounds)]
 
 use auth::JWTKeys;
 use axum::middleware;
@@ -34,6 +34,7 @@ mod cloudflare;
 mod routes;
 mod auth;
 mod objects;
+mod state;
 
 use server::{
     start_main_server,
@@ -75,15 +76,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let trace_layer = TraceLayer::new_for_http()
         .make_span_with(DefaultMakeSpan::default().include_headers(true));
     let app = configure_routes(
-        jwt_keys
+        &jwt_keys,
+        &config.jwt_config
     ).await;
     let app = app
         .fallback_service(ServeDir::new(assets_dir).append_index_html_on_directories(true))
-        .route_layer(
-            middleware::from_fn(
-                logs::metrics::track_metrics
-            )
-        )
         .layer(
             trace_layer.clone()
         )
@@ -96,9 +93,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // .with_state(db_client)
         // .with_state(cloudflare_ips);
 
-    let metrics_app = logs::metrics::metrics_app(
-        trace_layer
-    );
     let server_tls_config: Option<RustlsConfig> = {
         if config.server.enable_https {
             Some(
@@ -116,25 +110,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         config.server.host.parse().unwrap(),
         config.server.port,
     );
-    let metrics_server_addr = SocketAddr::new(
-        config.metrics_server.host.parse().unwrap(),
-        config.metrics_server.port,
-    );
 
 
-
-    let (_main_server, _metrics_server, _cloudflare_refresh_job) = tokio::join!(
+    let cloudflare_refresh_cron_job_enable = ! config.server.allow_non_cloudflare_ips;
+    let (_main_server, _cloudflare_refresh_job) = tokio::join!(
         start_main_server(
             app,
             server_addr,
             server_tls_config.clone()
-        ), start_metrics_server(
-            metrics_app,
-            metrics_server_addr
-        ), cloudflare::cloudflare_ip_refresh_cron_job(
+        ),
+        cloudflare::cloudflare_ip_refresh_cron_job(
             cloudflare_ips,
             Duration::from_secs(config.server.cloudflare_ips_refresh_interval_s.unwrap_or(3600 * 24)),
-            Duration::from_secs(config.server.cloudflare_ips_refresh_interval_jitter_s.unwrap_or(3600))
+            Duration::from_secs(config.server.cloudflare_ips_refresh_interval_jitter_s.unwrap_or(3600)),
+            cloudflare_refresh_cron_job_enable
         )
     );
     Ok(())

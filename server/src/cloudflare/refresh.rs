@@ -12,7 +12,13 @@ pub async fn cloudflare_ip_refresh_cron_job(
     cloudflare_ip_addresses: Arc<RwLock<CloudflareIpAddresses>>,
     interval: Duration,
     interval_jitter: Duration,
+    enabled: bool
 ) {
+
+    if !enabled {
+        return;
+    }
+
     tokio::time::sleep(
         Duration::from_secs(10)
     ).await;

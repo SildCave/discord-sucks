@@ -1,5 +1,11 @@
-use crate::auth::Claims;
+use axum::{http::StatusCode, response::IntoResponse};
 
-pub async fn secured(claims: Claims) -> &'static str {
-    "Secured!"
+use crate::auth::{ClaimType, Claims};
+
+pub async fn secured(claims: Claims) -> (StatusCode, String) {
+    if !claims.valid_type(ClaimType::Access) {
+        return (StatusCode::UNAUTHORIZED, "Unauthorized".to_string());
+    }
+
+    return (StatusCode::OK, "Secured".to_string());
 }

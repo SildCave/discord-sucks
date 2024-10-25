@@ -1,5 +1,7 @@
 version: '3'
 
+name: discord-sucks
+
 services:
   postgres:
     image: postgres:14-alpine
@@ -13,7 +15,7 @@ services:
 
   pgAdmin:
     image: dpage/pgadmin4
-    container_name: pgAdmin
+    container_name: pgAdmin-discord-sucks
     env_file:
       - ./postgres.env
     ports:
