@@ -33,8 +33,9 @@ mod logs;
 mod cloudflare;
 mod routes;
 mod auth;
-mod objects;
+mod app_objects;
 mod state;
+mod credentials;
 
 use server::{
     start_main_server,

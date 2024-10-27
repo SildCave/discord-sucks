@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::http::StatusCode;
 
 use crate::auth::{ClaimType, Claims};
 

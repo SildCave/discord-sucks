@@ -1,7 +1,11 @@
 use anyhow::Result;
 
-use axum::extract::FromRef;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize, 
+    Serialize
+};
+
+use crate::credentials::PasswordRequirements;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
@@ -10,6 +14,7 @@ pub struct Config {
     pub redis_database: RedisDatabaseConfig,
     #[serde(rename = "jwt")]
     pub jwt_config: JWTConfig,
+    pub password_requirements: PasswordRequirements,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -1,7 +1,4 @@
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
-};
+use axum_extra::TypedHeader;
 use axum::{
     async_trait,
     extract::FromRequestParts,
@@ -9,15 +6,19 @@ use axum::{
     RequestPartsExt,
 };
 
-use jsonwebtoken::{
-    decode, DecodingKey, EncodingKey, Validation
-};
-use serde::{Deserialize, Serialize};
 
 use anyhow::Result;
 
+use super::{
+    super::AuthError,
+    extractors::extract_token_from_cookie,
+    verification::verify_token,
+    ClaimType,
+    Claims,
+    JWTKeys
+};
 
-use super::{super::AuthError, extractors::extract_token_from_cookie, verification::verify_token, ClaimType, Claims, JWTKeys};
+
 #[async_trait]
 impl FromRequestParts<JWTKeys> for Claims
 {
@@ -46,9 +47,9 @@ impl FromRequestParts<JWTKeys> for Claims
             Some(ClaimType::Access)
         ).await.map_err(|err| Into::<AuthError>::into(err))?;
 
-        if claims.exp < chrono::Utc::now().timestamp() {
-            return Err(AuthError::ExpiredToken);
-        }
+        // if claims.exp < chrono::Utc::now().timestamp() {
+        //     return Err(AuthError::ExpiredToken);
+        // }
         Ok(claims)
     }
 }

@@ -13,6 +13,16 @@ refresh_key_lifetime_s = 1000
 access_key_lifetime_s = 300
 jwt_secret_path = "configuration/server/jwt_secret.txt"
 
+[password_requirements]
+min_length = 12
+max_length = 64
+must_contain_uppercase = true
+must_contain_symbol = true
+must_contain_number = true
+ascii_only = true
+no_special_characters = true
+no_whitespaces = true
+
 
 [postgres_database]
 username = "admin"

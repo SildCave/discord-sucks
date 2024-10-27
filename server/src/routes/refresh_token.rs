@@ -1,29 +1,30 @@
-use std::{fmt::format, sync::Arc};
+use std::sync::Arc;
 
 use axum::{
-    extract::State, http::{request::Parts, HeaderMap, HeaderValue}, Json
+    extract::State, http::{
+        HeaderMap,
+        HeaderValue
+    }
 };
-use headers::{Cookie, HeaderMapExt};
-use jsonwebtoken::{
-    decode, encode, Header
-};
-
-use crate::{auth::{extract_token_from_cookie, verify_token, AuthError, AuthenticationBody, AuthenticationPayload, ClaimType, Claims, JWTKeys}, state::RefreshState};
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
-};
-use axum::{
-    async_trait,
-    extract::FromRequestParts,
-    RequestPartsExt,
-};
-
-use jsonwebtoken::{
-    Validation
-};
-use serde::{Deserialize, Serialize};
 use axum::http::header::SET_COOKIE;
+
+use axum_extra::TypedHeader;
+
+use headers::Cookie;
+use jsonwebtoken::{
+    encode, Header
+};
+
+use crate::{
+    auth::{
+        extract_token_from_cookie,
+        verify_token,
+        AuthError,
+        ClaimType,
+        Claims,
+    },
+    state::RefreshState
+};
 
 use anyhow::Result;
 

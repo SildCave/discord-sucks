@@ -1,4 +1,8 @@
-use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::{
+  decode,
+  Algorithm,
+  Validation
+};
 
 use crate::auth::AuthError;
 
@@ -15,8 +19,6 @@ pub enum VerificationError {
     // The error in question
     #[error("Expired token")]
     ExpiredToken,
-    #[error("No token")]
-    NoToken,
 
     // Generic error
     #[error(transparent)]
@@ -30,7 +32,6 @@ impl From<VerificationError> for AuthError {
         match err {
             VerificationError::InvalidToken => Self::InvalidToken,
             VerificationError::ExpiredToken => Self::ExpiredToken,
-            VerificationError::NoToken => Self::NoToken,
             VerificationError::JWTError { source: _ } => Self::InvalidToken,
         }
     }
@@ -41,8 +42,8 @@ impl From<jsonwebtoken::errors::Error> for VerificationError {
     fn from(err: jsonwebtoken::errors::Error) -> Self {
         match err.kind() {
             jsonwebtoken::errors::ErrorKind::ExpiredSignature => Self::ExpiredToken,
-                _ => Self::JWTError { source: err },
-            }
+            _ => Self::JWTError { source: err },
+        }
     }
 }
 

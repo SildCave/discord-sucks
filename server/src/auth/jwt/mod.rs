@@ -6,9 +6,7 @@ mod verification;
 
 mod authorization_middleware;
 
-pub use extractors::{
-    extract_token_from_cookie
-};
+pub use extractors::extract_token_from_cookie;
 
 pub use claims::{
     Claims,
@@ -16,6 +14,4 @@ pub use claims::{
 };
 
 pub use verification::verify_token;
-pub use keys::{
-    JWTKeys
-};
+pub use keys::JWTKeys;
