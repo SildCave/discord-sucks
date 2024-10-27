@@ -76,9 +76,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let trace_layer = TraceLayer::new_for_http()
         .make_span_with(DefaultMakeSpan::default().include_headers(true));
+
+    let password_requirements = config.password_requirements.clone();
     let app = configure_routes(
         &jwt_keys,
-        &config.jwt_config
+        &config.jwt_config,
+        db_client.clone(),
+        password_requirements
     ).await;
     let app = app
         .fallback_service(ServeDir::new(assets_dir).append_index_html_on_directories(true))

@@ -9,6 +9,7 @@ use argon2::{
 
 use anyhow::Result;
 use tokio::task::JoinHandle;
+use tracing::info;
 
 use super::password::{self, Password};
 
@@ -49,6 +50,7 @@ impl Password<'_> {
         let password = self.get_password();
         let salt = match salt {
             SaltMode::FromString(salt) => {
+                info!("Salt: {}", salt);
                 let salt = SaltString::from_b64(&salt).unwrap();
                 salt
             },

@@ -16,5 +16,7 @@ pub enum DatabaseError {
     TokioError(#[from] tokio::task::JoinError),
     #[error("User with id: {0} not found")]
     UserNotFound(i64),
+    #[error("User with id: {0} already exists")]
+    UserAlreadyExists(i64),
 }
 

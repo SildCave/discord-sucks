@@ -38,7 +38,7 @@ pub struct Password<'a> {
     requirements: &'a PasswordRequirements,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PasswordRequirements {
     #[serde(rename = "min_length")]
     pub expected_min_length: usize,
@@ -88,6 +88,8 @@ impl <'b>Password<'b> {
         ).await.map_err(
             |e| PasswordError::HashError(e.to_string())
         )?;
+        println!("Hash to compare: {}", hash_to_compare);
+        println!("New hash: {}", new_hash.password_hash);
         if new_hash.password_hash != hash_to_compare {
             return Ok(false);
         } else {

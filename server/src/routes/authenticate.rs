@@ -21,8 +21,7 @@ use crate::{
         AuthenticationPayload,
         ClaimType,
         Claims,
-    },
-    state::AuthenticationState
+    }, credentials::Password, state::AuthenticationState
 };
 
 
@@ -30,17 +29,36 @@ pub async fn authenticate(
     State(authentication_state): State<Arc<AuthenticationState>>,
     Json(payload): Json<AuthenticationPayload>,
 ) -> Result<impl IntoResponse, AuthError> {
-    // Check if the user sent the credentials
-    if payload.email.is_empty() || payload.password.is_empty() {
-        return Err(AuthError::MissingCredentials);
+
+    // Check if email exists in the db
+    let user_id = authentication_state.db_client.get_user_id_by_email_with_cache(&payload.email).await.unwrap();
+    if user_id.is_none() {
+        return Err(AuthError::WrongCredentials);
     }
-    // Here you can check the user credentials from a database
-    if payload.email != "foo" || payload.password != "bar" {
+    let user_id = user_id.unwrap();
+    let (password_hash, salt) = authentication_state.db_client.get_password_hash_and_salt_by_user_id_with_caching(user_id).await.unwrap();
+    println!("Password hash: {}", password_hash);
+    let user_imputed_password_hash = Password::new(
+        &payload.password,
+        &authentication_state.password_requirements
+    );
+    // Check if the password is correct
+    let valid = user_imputed_password_hash.check_if_password_matches_hash(
+        &salt,
+        &password_hash
+    ).await.unwrap();
+
+    if !valid {
         return Err(AuthError::WrongCredentials);
     }
 
+    // Get password hash from the db
+    
+    
+
     let claims: Claims = Claims::new_refresh(
-        authentication_state.jwt_config.refresh_key_lifetime_s
+        authentication_state.jwt_config.refresh_key_lifetime_s,
+        user_id
     );
     // Create the authorization token
     let token = encode(

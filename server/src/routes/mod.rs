@@ -17,19 +17,24 @@ use hello_world::hello_world;
 use secured::secured;
 use authenticate::authenticate;
 
-use crate::{auth::JWTKeys, configuration::JWTConfig, state::{ApiState, AuthenticationState, RefreshState}};
+use crate::{auth::JWTKeys, configuration::JWTConfig, credentials::PasswordRequirements, database::DatabaseClientWithCaching, state::{ApiState, AuthenticationState, RefreshState}};
 
 pub async fn configure_routes(
     jwt_keys: &JWTKeys,
-    jwt_config: &JWTConfig
+    jwt_config: &JWTConfig,
+    db_client: DatabaseClientWithCaching,
+    password_requirements: PasswordRequirements,
 ) -> Router {
     let authentication_state = AuthenticationState {
         jwt_keys: jwt_keys.clone(),
         jwt_config: jwt_config.clone(),
+        db_client: db_client.clone(),
+        password_requirements: password_requirements.clone(),
     };
     let refresh_state = RefreshState {
         jwt_keys: jwt_keys.clone(),
         jwt_config: jwt_config.clone(),
+        db_client: db_client.clone(),
     };
 
 

@@ -39,17 +39,20 @@ pub async fn refresh_token(
         ClaimType::Refresh
     )?;
 
-    verify_token(
+    let claims = verify_token(
         &bearer_token,
         &refresh_state.jwt_keys,
         Some(ClaimType::Refresh)
     ).await.map_err(|err| Into::<AuthError>::into(err))?;
 
+    let user_id = claims.user_id;
+
     // Here you must check if refresh token is valid (redis <= postgres)
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     let claims = Claims::new_access(
-        refresh_state.jwt_config.access_key_lifetime_s
+        refresh_state.jwt_config.access_key_lifetime_s,
+        user_id
     );
 
     let token = encode(&Header::default(), &claims, &refresh_state.jwt_keys.encoding)

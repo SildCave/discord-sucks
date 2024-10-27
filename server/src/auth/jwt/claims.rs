@@ -27,6 +27,8 @@ pub struct Claims {
     pub exp: i64,
     // Token type
     pub claim_type: ClaimType,
+    // User id
+    pub user_id: i64,
 }
 
 impl Claims {
@@ -36,24 +38,28 @@ impl Claims {
     }
 
     pub fn new_access(
-        lifetime: i64
+        lifetime: i64,
+        user_id: i64
     ) -> Self {
         let now = chrono::Utc::now().timestamp();
         Self {
             iat: now,
             exp: (now + lifetime),
             claim_type: ClaimType::Access,
+            user_id,
         }
     }
 
     pub fn new_refresh(
-        lifetime: i64
+        lifetime: i64,
+        user_id: i64
     ) -> Self {
         let now = chrono::Utc::now().timestamp();
         Self {
             iat: now,
             exp: (now + lifetime),
             claim_type: ClaimType::Refresh,
+            user_id,
         }
     }
 }
