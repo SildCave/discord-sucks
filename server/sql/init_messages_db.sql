@@ -9,5 +9,6 @@ CREATE TABLE
         email VARCHAR(64),
         created_at BIGINT NOT NULL,
         valid_refresh_token VARCHAR(1024),
-        verified BOOLEAN NOT NULL
+        verified BOOLEAN NOT NULL,
+        banned BOOLEAN NOT NULL
     );

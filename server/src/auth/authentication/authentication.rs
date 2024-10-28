@@ -4,13 +4,13 @@ use crate::auth::ClaimType;
 
 #[derive(Debug, Serialize)]
 pub struct AuthenticationBody {
-    pub access_token: String,
+    pub refresh_token: String,
     pub token_type: String,
 }
 impl AuthenticationBody {
-    pub fn new(access_token: String) -> Self {
+    pub fn new(refresh_token: String) -> Self {
         Self {
-            access_token,
+            refresh_token,
             token_type: ClaimType::Refresh.as_str().to_string(),
         }
     }

@@ -6,3 +6,5 @@ pub use password::{
     PasswordError,
     PasswordRequirements
 };
+
+pub use password_preparation::SaltMode;

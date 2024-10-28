@@ -18,7 +18,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum PasswordPreparationError {
-    #[error("Failed to hash password")]
+    #[error("Failed to hash password, reason: {0}")]
     HashError(String),
 }
 
@@ -87,7 +87,8 @@ impl Password<'_> {
 mod tests {
     use super::*;
     use rand::{distributions::Alphanumeric, Rng};
-    
+    use pretty_assertions::assert_eq;
+
     #[tokio::test]
     async fn test_hash_and_salt_password() {
         let password: String = rand::thread_rng()
@@ -102,6 +103,6 @@ mod tests {
 
         let hash_to_check = password.hash_and_salt_password(&SaltMode::FromString(&salt)).await.unwrap();
 
-        assert!(prepared_password.salt == hash_to_check.salt);
+        assert_eq!(prepared_password.salt, hash_to_check.salt);
     }
 }

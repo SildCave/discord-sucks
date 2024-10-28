@@ -187,6 +187,7 @@ impl <'b>Password<'b> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_successful_check_if_password_is_valid_based_on_requirements() {

@@ -7,6 +7,24 @@ pub struct User {
     pub email: Option<String>,
     pub created_at: i64,
     pub valid_refresh_token: Option<String>,
-    pub verified: bool
+    pub verified: bool,
+    pub banned: bool,
 }
 
+
+impl Default for User {
+    fn default() -> Self {
+        User {
+            id: 0,
+            username: "".to_string(),
+            password_hash: "".to_string(),
+            salt: "".to_string(),
+            email: None,
+            created_at: 0,
+            valid_refresh_token: None,
+            verified: true,
+            banned: false,
+        }
+    }
+    
+}

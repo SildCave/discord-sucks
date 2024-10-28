@@ -3,6 +3,8 @@ mod secured;
 mod authenticate;
 mod refresh_token;
 
+mod tests;
+
 use std::sync::Arc;
 
 use axum::{

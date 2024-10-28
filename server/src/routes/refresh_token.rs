@@ -47,8 +47,19 @@ pub async fn refresh_token(
 
     let user_id = claims.user_id;
 
-    // Here you must check if refresh token is valid (redis <= postgres)
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    let real_refresh_token = refresh_state
+        .db_client.get_user_refresh_token_with_caching(
+            user_id
+        )
+        .await.unwrap();
+
+    if real_refresh_token.is_none() {
+        return Err(AuthError::InvalidToken);
+    }
+
+    if real_refresh_token.unwrap() != bearer_token {
+        return Err(AuthError::InvalidToken);
+    }
 
     let claims = Claims::new_access(
         refresh_state.jwt_config.access_key_lifetime_s,
