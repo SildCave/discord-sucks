@@ -13,7 +13,8 @@ use jsonwebtoken::{
     Header
 };
 use reqwest::header::SET_COOKIE;
-use tracing::info;
+use tracing::{error, info};
+use uuid::Uuid;
 use std::sync::Arc;
 use crate::{
     auth::{
@@ -30,25 +31,58 @@ pub async fn authenticate(
     State(authentication_state): State<Arc<AuthenticationState>>,
     Json(payload): Json<AuthenticationPayload>,
 ) -> Result<impl IntoResponse, AuthError> {
+    let request_id = Uuid::new_v4().to_string();
+    let request_span = tracing::info_span!(
+        "authenticate_user",
+        %request_id,
+        subscriber_email = %payload.email,
+    );
+    let _request_span_guard = request_span.enter();
+    info!("authenticating user");
 
     // Check if email exists in the db
-    let user_id = authentication_state.db_client.get_user_id_by_email_with_cache(&payload.email).await.unwrap();
-    info!("user_id: {:?}", user_id);
+    let db_res = authentication_state.db_client.get_user_id_by_email_with_cache(&payload.email).await;
+    //info!("user_id: {:?}", user_id);
+    if db_res.is_err() {
+        let db_error = db_res.unwrap_err();
+        error!("db_error: {:?}", db_error);
+        let error = db_error.to_auth_error();
+        return Err(error);
+    }
+
+    let user_id = db_res.unwrap();
     if user_id.is_none() {
         return Err(AuthError::WrongCredentials);
     }
     let user_id = user_id.unwrap();
-    let (password_hash, salt) = authentication_state.db_client.get_password_hash_and_salt_by_user_id_with_caching(user_id).await.unwrap();
+    let db_res = authentication_state.db_client.get_password_hash_and_salt_by_user_id_with_caching(user_id).await;
+    if db_res.is_err() {
+        let db_error = db_res.unwrap_err();
+        error!("db_error: {:?}", db_error);
+        let error = db_error.to_auth_error();
+        return Err(error);
+    }
+
+    let (password_hash, salt) = db_res.unwrap();
+
     info!("salt: {:?}", salt);
     let user_imputed_password_hash = Password::new(
         &payload.password,
         &authentication_state.password_requirements
     );
     // Check if the password is correct
-    let valid = user_imputed_password_hash.check_if_password_matches_hash(
+    let match_result = user_imputed_password_hash.check_if_password_matches_hash(
         &salt,
         &password_hash
-    ).await.unwrap();
+    ).await;
+    if match_result.is_err() {
+        let error = match_result.as_ref().unwrap_err();
+        error!("password error: {:?}", error);
+        let error = error.to_auth_error();
+        return Err(error);
+    }
+
+    let valid = match_result.unwrap();
 
     if !valid {
         return Err(AuthError::WrongCredentials);
@@ -82,10 +116,16 @@ pub async fn authenticate(
     headers.insert(SET_COOKIE, HeaderValue::from_str(&cookie.to_string()).unwrap());
 
     // Update the refresh token in the db
-    authentication_state.db_client.update_user_refresh_token_with_caching(
+    let db_res = authentication_state.db_client.update_user_refresh_token_with_caching(
         user_id,
         &refresh_token
-    ).await.unwrap();
+    ).await;
+    if db_res.is_err() {
+        let db_error = db_res.unwrap_err();
+        error!("db_error: {:?}", db_error);
+        let error = db_error.to_auth_error();
+        return Err(error);
+    }
 
     // Send the authorized token
     Ok((headers, Json(AuthenticationBody::new(refresh_token))))

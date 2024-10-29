@@ -14,6 +14,7 @@ use headers::Cookie;
 use jsonwebtoken::{
     encode, Header
 };
+use tracing::error;
 
 use crate::{
     auth::{
@@ -39,19 +40,34 @@ pub async fn refresh_token(
         ClaimType::Refresh
     )?;
 
-    let claims = verify_token(
+    let verification_res = verify_token(
         &bearer_token,
         &refresh_state.jwt_keys,
         Some(ClaimType::Refresh)
-    ).await.map_err(|err| Into::<AuthError>::into(err))?;
+    ).await;
+
+    if verification_res.is_err() {
+        let verification_error = verification_res.unwrap_err();
+        error!("verification error: {:?}", verification_error);
+        let error = verification_error.to_auth_error();
+        return Err(error);
+    }
+    let claims = verification_res.unwrap();
 
     let user_id = claims.user_id;
 
-    let real_refresh_token = refresh_state
+    let db_res = refresh_state
         .db_client.get_user_refresh_token_with_caching(
             user_id
         )
-        .await.unwrap();
+        .await;
+    if db_res.is_err() {
+        let db_error = db_res.unwrap_err();
+        error!("db_error: {:?}", db_error);
+        let error = db_error.to_auth_error();
+        return Err(error);
+    }
+    let real_refresh_token = db_res.unwrap();
 
     if real_refresh_token.is_none() {
         return Err(AuthError::InvalidToken);
@@ -66,8 +82,18 @@ pub async fn refresh_token(
         user_id
     );
 
-    let token = encode(&Header::default(), &claims, &refresh_state.jwt_keys.encoding)
-        .map_err(|_| AuthError::TokenCreation)?;
+    let encoding_res = encode(
+        &Header::default(),
+        &claims,
+        &refresh_state.jwt_keys.encoding
+    );
+    if encoding_res.is_err() {
+        let encoding_error = encoding_res.unwrap_err();
+        error!("encoding error: {:?}", encoding_error);
+        return Err(AuthError::TokenCreation);
+    }
+
+    let token = encoding_res.unwrap();
 
     let cookie = cookie::Cookie::build(
         (ClaimType::Access.as_str(), format!("Bearer {}", token))
@@ -84,7 +110,6 @@ pub async fn refresh_token(
         SET_COOKIE, HeaderValue::from_str(&cookie.to_string()).unwrap()
     );
 
-    println!("{:?}", headers);
     Ok(headers)
 
 }

@@ -27,6 +27,22 @@ pub enum VerificationError {
     }
 }
 
+impl VerificationError {
+    pub fn into_internal_error_code(&self) -> &'static str {
+        match self {
+            VerificationError::InvalidToken => "1400",
+            VerificationError::ExpiredToken => "1401",
+            VerificationError::JWTError { source: _ } => "1402",
+        }
+    }
+
+    pub fn to_auth_error(&self) -> AuthError {
+        AuthError::InternalError(
+            self.into_internal_error_code()
+        )
+    }
+}
+
 impl From<VerificationError> for AuthError {
     fn from(err: VerificationError) -> Self {
         match err {

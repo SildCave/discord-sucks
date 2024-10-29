@@ -53,7 +53,7 @@ mod tests {
             id: 420,
             ..User::default()
         };
-        let _ = db_client.delete_user_refresh_token_in_postgres(420).await.unwrap();
+        let _ = db_client.delete_user_refresh_token_in_postgres(420).await;
         let res = db_client.delete_user_from_postgres_by_id(420).await;
         if res.is_err() {
             match res.err().unwrap() {

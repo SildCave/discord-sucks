@@ -34,17 +34,21 @@ pub enum AuthError {
     InvalidToken,
     ExpiredToken,
     NoToken,
+    InternalError(&'static str),
 }
 
-impl IntoResponse for AuthError {
+impl <'b>IntoResponse for AuthError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
             AuthError::WrongCredentials => (StatusCode::UNAUTHORIZED, "Wrong credentials"),
             AuthError::MissingCredentials => (StatusCode::BAD_REQUEST, "Missing credentials"),
-            AuthError::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "Token creation error"),
+            AuthError::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "1300"),
             AuthError::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token"),
             AuthError::ExpiredToken => (StatusCode::UNAUTHORIZED, "Expired token"),
             AuthError::NoToken => (StatusCode::BAD_REQUEST, "No token"),
+            AuthError::InternalError(error_message) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, error_message)
+            },
         };
         let body = Json(json!({
             "error": error_message,

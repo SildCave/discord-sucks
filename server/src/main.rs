@@ -75,7 +75,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_origin(Any);
 
     let trace_layer = TraceLayer::new_for_http()
-        .make_span_with(DefaultMakeSpan::default().include_headers(true));
+        .make_span_with(
+            DefaultMakeSpan::default().include_headers(true)
+        );
 
     let password_requirements = config.password_requirements.clone();
     let app = configure_routes(

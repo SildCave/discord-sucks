@@ -5,7 +5,7 @@ use sqlx::any;
 use thiserror::Error;
 
 use super::password_preparation::SaltMode;
-
+use crate::auth::AuthError;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum PasswordError {
@@ -30,6 +30,29 @@ pub enum PasswordError {
     // Generic error
     #[error("Password preparation error: {0}")]
     HashError(String),
+}
+
+impl PasswordError {
+    pub fn into_internal_error_code(&self) -> &'static str {
+        match self {
+            PasswordError::PasswordTooShort(_) => "1100",
+            PasswordError::PasswordNoUppercase(_) => "1101",
+            PasswordError::PasswordNoSymbol(_) => "1102",
+            PasswordError::PasswordNoNumber(_) => "1103",
+            PasswordError::PasswordNotAscii => "1104",
+            PasswordError::PasswordContainsSpecialCharacters => "1105",
+            PasswordError::PasswordContainsWhitespaces => "1106",
+            PasswordError::PasswordTooLong(_) => "1107",
+            PasswordError::PasswordDoesNotMatchHash => "1108",
+            PasswordError::HashError(_) => "1109",
+        }
+    }
+
+    pub fn to_auth_error(&self) -> AuthError {
+        AuthError::InternalError(
+            self.into_internal_error_code()
+        )
+    }
 }
 
 
