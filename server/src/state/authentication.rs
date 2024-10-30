@@ -1,6 +1,6 @@
 use crate::{auth::JWTKeys, configuration::JWTConfig, credentials::PasswordRequirements, database::DatabaseClientWithCaching};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AuthenticationState {
     pub jwt_keys: JWTKeys,
     pub jwt_config: JWTConfig,

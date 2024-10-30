@@ -13,7 +13,7 @@ use jsonwebtoken::{
     Header
 };
 use reqwest::header::SET_COOKIE;
-use tracing::{error, info};
+use tracing::{error, info, instrument};
 use uuid::Uuid;
 use std::sync::Arc;
 use crate::{
@@ -26,6 +26,7 @@ use crate::{
     }, credentials::Password, state::AuthenticationState
 };
 
+// FIX TRACING ON ASYNC
 
 pub async fn authenticate(
     State(authentication_state): State<Arc<AuthenticationState>>,

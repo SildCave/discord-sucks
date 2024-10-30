@@ -156,7 +156,7 @@ pub(super) mod tests {
         let app = app.layer(
             trace_layer.clone()
         );
-        //logs::setup_logging().unwrap();
+        logs::setup_logging().unwrap();
 
         let cookie = "refresh_token=invalid_token";
         let req = Request::builder()
