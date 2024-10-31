@@ -57,7 +57,7 @@ pub async fn refresh_token(
     let user_id = claims.user_id;
 
     let db_res = refresh_state
-        .db_client.get_user_refresh_token_with_caching(
+        .db_client.cached_get_user_refresh_token(
             user_id
         )
         .await;

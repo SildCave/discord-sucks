@@ -8,7 +8,7 @@ use crate::database::{
 
 
 impl DatabaseClientWithCaching {
-    pub async fn update_user_refresh_token_with_caching(
+    pub async fn cached_update_user_refresh_token(
         &self,
         user_id: i64,
         refresh_token: &str
@@ -21,7 +21,7 @@ impl DatabaseClientWithCaching {
             let refresh_token = refresh_token.to_string();
             let db_client = db_client.clone();
             async move {
-                db_client.set_user_refresh_token_in_postgres(user_id, &refresh_token).await
+                db_client.postgres_set_user_refresh_token(user_id, &refresh_token).await
             }
         });
 
@@ -31,7 +31,7 @@ impl DatabaseClientWithCaching {
             let refresh_token = refresh_token.to_string();
             let db_client = db_client.clone();
             async move {
-                db_client.set_user_refresh_token_in_redis(user_id, &refresh_token).await
+                db_client.redis_set_user_refresh_token(user_id, &refresh_token).await
             }
         });
 
@@ -44,7 +44,7 @@ impl DatabaseClientWithCaching {
             Ok(_) => {},
             Err(e) => {
                 // If there was an error Joining Postgres job, delete the token from Redis
-                self.delete_user_refresh_token_in_redis(user_id).await?;
+                self.redis_delete_user_refresh_token(user_id).await?;
                 return Err(DatabaseError::TokioError(e));
             }
         }
@@ -52,7 +52,7 @@ impl DatabaseClientWithCaching {
             Ok(_) => {},
             Err(e) => {
                 // If there was an error Joining Redis job, delete the token from Postgres
-                self.delete_user_refresh_token_in_postgres(user_id).await?;
+                self.postgres_delete_user_refresh_token(user_id).await?;
                 return Err(DatabaseError::TokioError(e));
             }
         }
@@ -65,7 +65,7 @@ impl DatabaseClientWithCaching {
             Ok(_) => {},
             Err(e) => {
                 // If there was an error Joining Postgres job, delete the token from Redis
-                self.delete_user_refresh_token_in_redis(user_id).await?;
+                self.redis_delete_user_refresh_token(user_id).await?;
                 return Err(e);
             }
         }
@@ -74,7 +74,7 @@ impl DatabaseClientWithCaching {
             Ok(_) => {},
             Err(e) => {
                 // If there was an error Joining Redis job, delete the token from Postgres
-                self.delete_user_refresh_token_in_postgres(user_id).await?;
+                self.postgres_delete_user_refresh_token(user_id).await?;
                 return Err(e);
             }
         }
@@ -85,7 +85,7 @@ impl DatabaseClientWithCaching {
         Ok(())
     }
 
-    pub async fn delete_user_refresh_token_with_caching(
+    pub async fn cached_delete_user_refresh_token(
         &self,
         user_id: i64
     ) -> Result<(), DatabaseError> {
@@ -96,7 +96,7 @@ impl DatabaseClientWithCaching {
             let user_id = user_id;
             let db_client = db_client.clone();
             async move {
-                db_client.delete_user_refresh_token_in_postgres(user_id).await
+                db_client.postgres_delete_user_refresh_token(user_id).await
             }
         });
 
@@ -105,7 +105,7 @@ impl DatabaseClientWithCaching {
             let user_id = user_id;
             let db_client = db_client.clone();
             async move {
-                db_client.delete_user_refresh_token_in_redis(user_id).await
+                db_client.redis_delete_user_refresh_token(user_id).await
             }
         });
 
@@ -127,68 +127,14 @@ impl DatabaseClientWithCaching {
         Ok(())
     }
 
-    pub async fn get_user_id_by_email_with_cache(
-        &self,
-        email: &str
-    ) -> Result<Option<i64>, DatabaseError> {
-        let db_client = Arc::new(self.clone());
-
-        // Check Redis first
-        let user_id = db_client.get_user_id_by_email_from_redis(email).await?;
-
-        // If Redis has the user_id, return it
-        if !user_id.is_none() {
-            return Ok(user_id);
-        }
-
-        // If Redis doesn't have the user_id, check Postgres
-        let user_id = db_client.get_user_id_by_email_from_postgres(email).await?;
-
-        // If Postgres doesn't have the user_id, return None
-        if user_id.is_none() {
-            return Ok(None);
-        }
-
-        // If Postgres has the user_id, set it in Redis
-        let user_id = user_id.unwrap();
-        db_client.set_email_id_in_redis(email, user_id).await?;
-
-        return Ok(Some(user_id));
-    }
-
-    pub async fn get_password_hash_and_salt_by_user_id_with_caching(
-        &self,
-        user_id: i64
-    ) -> Result<(String, String), DatabaseError> {
-        let db_client = Arc::new(self.clone());
-
-        // Check Redis first
-        let password_hash = db_client.get_password_hash_by_user_id_from_redis(user_id).await?;
-        let salt = db_client.get_salt_by_user_id_from_redis(user_id).await?;
-
-        // If Redis has the password hash and salt, return them
-        if !password_hash.is_none() && !salt.is_none() {
-            return Ok((password_hash.unwrap(), salt.unwrap()));
-        }
-
-        // If Redis doesn't have the password hash and salt, check Postgres
-        let (password_hash, salt) = db_client.get_password_hash_and_salt_from_postgres_by_user_id(user_id).await?;
-
-
-        // If Postgres has the password hash and salt, set them in Redis
-        db_client.set_salt_in_redis(user_id, &salt).await?;
-        db_client.set_password_hash_in_redis(user_id, &password_hash).await?;
-
-        return Ok((password_hash, salt));
-    }
-    pub async fn get_user_refresh_token_with_caching(
+    pub async fn cached_get_user_refresh_token(
         &self,
         user_id: i64
     ) -> Result<Option<String>, DatabaseError> {
         let db_client = Arc::new(self.clone());
 
         // Check Redis first
-        let refresh_token = db_client.get_user_refresh_token_from_redis_by_user_id(user_id).await?;
+        let refresh_token = db_client.redis_get_user_refresh_token_by_user_id(user_id).await?;
 
         // If Redis has the token, return it
         if !refresh_token.is_none() {
@@ -196,7 +142,7 @@ impl DatabaseClientWithCaching {
         }
 
         // If Redis doesn't have the token, check Postgres
-        let refresh_token = db_client.get_user_refresh_token_from_postgres_by_user_id(user_id).await?;
+        let refresh_token = db_client.postgres_get_user_refresh_token_by_user_id(user_id).await?;
 
         // If Postgres doesn't have the token, return None
         if refresh_token.is_none() {
@@ -205,9 +151,10 @@ impl DatabaseClientWithCaching {
 
         // If Postgres has the token, set it in Redis
         let refresh_token = refresh_token.unwrap();
-        db_client.set_user_refresh_token_in_redis(user_id, &refresh_token).await?;
+        db_client.redis_set_user_refresh_token(user_id, &refresh_token).await?;
 
         return Ok(Some(refresh_token));
 
     }
+
 }

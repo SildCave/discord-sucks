@@ -31,17 +31,3 @@ pub async fn start_main_server(
     }
 
 }
-
-pub async fn start_metrics_server(
-    metrics_app: Router,
-    server_addr: SocketAddr,
-) {
-
-    let listener = tokio::net::TcpListener::bind(server_addr)
-        .await
-        .unwrap();
-    tracing::info!("metrics server listening on http://{}", server_addr);
-
-    axum::serve(listener, metrics_app).await.unwrap();
-
-}
