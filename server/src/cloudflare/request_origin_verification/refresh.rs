@@ -4,7 +4,7 @@ use rand::Rng;
 use tokio::sync::RwLock;
 use tracing::{error, info};
 
-use super::CloudflareIpAddresses;
+use super::super::CloudflareIpAddresses;
 
 
 

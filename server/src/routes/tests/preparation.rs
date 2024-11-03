@@ -33,9 +33,9 @@ mod preparation {
         let password_requirements = config.password_requirements.clone();
         let app = configure_routes(
             &jwt_keys,
-            &config.jwt_config,
             db_client.clone(),
-            password_requirements
+            password_requirements,
+            &config
         ).await;
 
         app
