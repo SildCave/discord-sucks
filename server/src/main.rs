@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cloudflare_validation_state = cloudflare::CloudflareValidationState {
         cloudflare_ips: cloudflare_ips.clone(),
-        allow_non_cloudflare_ips: config.server.allow_non_cloudflare_ips,
+        allow_non_cloudflare_ips: config.cloudflare.allow_non_cloudflare_ips,
     };
 
     let assets_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets");
@@ -82,9 +82,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let password_requirements = config.password_requirements.clone();
     let app = configure_routes(
         &jwt_keys,
-        &config.jwt_config,
         db_client.clone(),
-        password_requirements
+        password_requirements,
+        &config
     ).await;
     let app = app
         .fallback_service(ServeDir::new(assets_dir).append_index_html_on_directories(true))
@@ -119,17 +119,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
 
-    let cloudflare_refresh_cron_job_enable = ! config.server.allow_non_cloudflare_ips;
+    let cloudflare_refresh_cron_job_enable = ! config.cloudflare.allow_non_cloudflare_ips;
     let (_main_server, _cloudflare_refresh_job) = tokio::join!(
         start_main_server(
             app,
             server_addr,
-            server_tls_config.clone()
+            server_tls_config.clone(),
+            config.server.domain.clone()
         ),
         cloudflare::cloudflare_ip_refresh_cron_job(
             cloudflare_ips,
-            Duration::from_secs(config.server.cloudflare_ips_refresh_interval_s.unwrap_or(3600 * 24)),
-            Duration::from_secs(config.server.cloudflare_ips_refresh_interval_jitter_s.unwrap_or(3600)),
+            Duration::from_secs(config.cloudflare.cloudflare_ips_refresh_interval_s.unwrap_or(3600 * 24)),
+            Duration::from_secs(config.cloudflare.cloudflare_ips_refresh_interval_jitter_s.unwrap_or(3600)),
             cloudflare_refresh_cron_job_enable
         )
     );

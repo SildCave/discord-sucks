@@ -41,7 +41,7 @@ pub async fn cloudflare_validation_middleware(
     let ip = connection_info.ip();
     let cloudflare_ips = cloudflare_ips.read().await;
     trace!("Request from IP: {}", ip);
-    
+
     if cloudflare_ips.is_cloudflare_ip(ip) {
         trace!("Request from Cloudflare IP: {}", ip);
         drop(cloudflare_ips);

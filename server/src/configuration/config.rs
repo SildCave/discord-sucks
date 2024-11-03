@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 use serde::{
-    Deserialize, 
+    Deserialize,
     Serialize
 };
 
@@ -15,6 +15,7 @@ pub struct Config {
     #[serde(rename = "jwt")]
     pub jwt_config: JWTConfig,
     pub password_requirements: PasswordRequirements,
+    pub cloudflare: Cloudflare,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -22,11 +23,18 @@ pub struct ServerConfig {
     pub host: String,
     pub port: u16,
     pub enable_https: bool,
+    pub pem_cert_path: Option<String>,
+    pub pem_key_path: Option<String>,
+    pub domain: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Cloudflare {
+    pub turnstile_secret_key_path: String,
     pub allow_non_cloudflare_ips: bool,
     pub cloudflare_ips_refresh_interval_s: Option<u64>,
     pub cloudflare_ips_refresh_interval_jitter_s: Option<u64>,
-    pub pem_cert_path: Option<String>,
-    pub pem_key_path: Option<String>,
+    pub allow_invalid_turnstile: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

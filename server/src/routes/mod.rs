@@ -2,43 +2,46 @@ mod hello_world;
 mod secured;
 mod authenticate;
 mod refresh_token;
+mod registration;
 
 mod tests;
 
 use std::sync::Arc;
 
 use axum::{
-    routing::{
+    middleware, routing::{
         get,
         post
-    },
-    Router
+    }, Router
 };
 
 use hello_world::hello_world;
 use secured::secured;
 use authenticate::authenticate;
 
-use crate::{auth::JWTKeys, configuration::JWTConfig, credentials::PasswordRequirements, database::DatabaseClientWithCaching, state::{ApiState, AuthenticationState, RefreshState}};
+use crate::{auth::JWTKeys, cloudflare::{turnstile_verification, CloudflareTurnstileState}, configuration::{self, JWTConfig}, credentials::PasswordRequirements, database::DatabaseClientWithCaching, state::{ApiState, AuthenticationState, RefreshState}};
 
 pub async fn configure_routes(
     jwt_keys: &JWTKeys,
-    jwt_config: &JWTConfig,
     db_client: DatabaseClientWithCaching,
     password_requirements: PasswordRequirements,
+    config: &configuration::Config
 ) -> Router {
     let authentication_state = AuthenticationState {
         jwt_keys: jwt_keys.clone(),
-        jwt_config: jwt_config.clone(),
+        jwt_config: config.jwt_config.clone(),
         db_client: db_client.clone(),
         password_requirements: password_requirements.clone(),
     };
     let refresh_state = RefreshState {
         jwt_keys: jwt_keys.clone(),
-        jwt_config: jwt_config.clone(),
+        jwt_config: config.jwt_config.clone(),
         db_client: db_client.clone(),
     };
 
+    let turnstile_state = CloudflareTurnstileState::new(
+        &config
+    ).unwrap();
 
     let api_state = ApiState {
         authentication: Arc::new(authentication_state),
@@ -53,6 +56,12 @@ pub async fn configure_routes(
             .with_state(api_state.clone())
         .route("/secured", get(secured))
             .with_state(jwt_keys.clone())
+        .route("/register_user", post(registration::register_user))
+            .route_layer(
+                middleware::from_fn_with_state(
+                    turnstile_state.clone(), turnstile_verification
+                )
+            )
         //.route("/health", axum::handler::get(|| async { "OK" }))
 }
 

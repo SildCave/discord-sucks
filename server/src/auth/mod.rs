@@ -37,7 +37,7 @@ pub enum AuthError {
     InternalError(&'static str),
 }
 
-impl <'b>IntoResponse for AuthError {
+impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
             AuthError::WrongCredentials => (StatusCode::UNAUTHORIZED, "Wrong credentials"),

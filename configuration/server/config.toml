@@ -2,11 +2,16 @@
 host = "172.16.0.4"
 port = 4443
 enable_https = false
+pem_cert_path = "configuration/server/ssl/cert.pem"
+pem_key_path = "configuration/server/ssl/.key"
+domain = "discord-sucks.usiiaa.top"
+
+[cloudflare]
+turnstile_secret_key_path = "configuration/server/turnstile_secret.txt"
+allow_invalid_turnstile = false
 allow_non_cloudflare_ips = true
 cloudflare_ips_refresh_interval_s = 5
 cloudflare_ips_refresh_interval_jitter_s = 10
-pem_cert_path = "configuration/server/ssl/cert.pem"
-pem_key_path = "configuration/server/ssl/.key"
 
 [jwt]
 refresh_key_lifetime_s = 1000
