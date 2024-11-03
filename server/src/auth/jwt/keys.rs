@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use anyhow::Result;
 
@@ -8,6 +10,15 @@ use crate::configuration::Config;
 pub struct JWTKeys {
     pub encoding: EncodingKey,
     pub decoding: DecodingKey,
+}
+
+impl Debug for JWTKeys {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JWTKeys")
+            .field("encoding", &"EncodingKey")
+            .field("decoding", &"DecodingKey")
+            .finish()
+    }
 }
 
 impl JWTKeys {

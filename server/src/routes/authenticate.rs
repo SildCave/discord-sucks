@@ -13,7 +13,7 @@ use jsonwebtoken::{
     Header
 };
 use reqwest::header::SET_COOKIE;
-use tracing::{error, info};
+use tracing::{error, info, instrument};
 use uuid::Uuid;
 use std::sync::Arc;
 use crate::{
@@ -26,6 +26,7 @@ use crate::{
     }, credentials::Password, state::AuthenticationState
 };
 
+// FIX TRACING ON ASYNC
 
 pub async fn authenticate(
     State(authentication_state): State<Arc<AuthenticationState>>,
@@ -35,7 +36,7 @@ pub async fn authenticate(
     info!("request_id: {}, authenticating user", request_id);
 
     // Check if email exists in the db
-    let db_res = authentication_state.db_client.get_user_id_by_email_with_cache(&payload.email).await;
+    let db_res = authentication_state.db_client.cached_get_user_id_by_email(&payload.email).await;
     //info!("user_id: {:?}", user_id);
     if db_res.is_err() {
         let db_error = db_res.unwrap_err();
@@ -51,7 +52,7 @@ pub async fn authenticate(
     info!("request_id: {}, user with id: {:?} found", request_id, user_id);
 
     let user_id = user_id.unwrap();
-    let db_res = authentication_state.db_client.get_password_hash_and_salt_by_user_id_with_caching(user_id).await;
+    let db_res = authentication_state.db_client.cached_get_password_hash_and_salt_by_user_id(user_id).await;
     if db_res.is_err() {
         let db_error = db_res.unwrap_err();
         error!("request_id: {}, db_error: {:?}", request_id, db_error);
@@ -118,7 +119,7 @@ pub async fn authenticate(
     headers.insert(SET_COOKIE, HeaderValue::from_str(&cookie.to_string()).unwrap());
 
     // Update the refresh token in the db
-    let db_res = authentication_state.db_client.update_user_refresh_token_with_caching(
+    let db_res = authentication_state.db_client.cached_update_user_refresh_token(
         user_id,
         &refresh_token
     ).await;

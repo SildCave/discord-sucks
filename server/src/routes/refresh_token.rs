@@ -49,7 +49,7 @@ pub async fn refresh_token(
     if verification_res.is_err() {
         let verification_error = verification_res.unwrap_err();
         error!("verification error: {:?}", verification_error);
-        let error = verification_error.to_auth_error();
+        let error = verification_error.into();
         return Err(error);
     }
     let claims = verification_res.unwrap();
@@ -57,7 +57,7 @@ pub async fn refresh_token(
     let user_id = claims.user_id;
 
     let db_res = refresh_state
-        .db_client.get_user_refresh_token_with_caching(
+        .db_client.cached_get_user_refresh_token(
             user_id
         )
         .await;

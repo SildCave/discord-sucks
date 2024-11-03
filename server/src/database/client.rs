@@ -7,7 +7,7 @@ use super::{
 use anyhow::Result;
 use tracing::error;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DatabaseClientWithCaching {
     pub redis_con: redis::aio::MultiplexedConnection,
     pub postgres_con: sqlx::postgres::PgPool,

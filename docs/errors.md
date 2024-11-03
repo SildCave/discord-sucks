@@ -32,3 +32,9 @@
 | -------- | ------- |
 | TokenCreation | 1300 |
 
+## Verification Error Codes
+| Error    | Code |
+| -------- | ------- |
+| InvalidToken | 1400 |
+| ExpiredToken | 1401 |
+| JWTError     | 1402 |

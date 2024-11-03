@@ -29,7 +29,7 @@ pub(super) mod tests {
         app: Router
     ) -> String {
         let db_client = get_db_client().await;
-        db_client.delete_password_hash_by_user_id_in_redis(420).await.unwrap();
+        db_client.redis_delete_password_hash_by_user_id(420).await.unwrap();
         let config = get_config();
         let test_password = Password::new(
             "test_password123*&@#ABC",
@@ -48,14 +48,14 @@ pub(super) mod tests {
             salt: salt_string.to_string(),
             ..User::default()
         };
-        let res = db_client.delete_user_from_postgres_by_id(420).await;
+        let res = db_client.postgres_delete_user_by_id(420).await;
         if res.is_err() {
             match res.err().unwrap() {
                 crate::database::DatabaseError::UserNotFound(_) => {},
                 _ => panic!("Error deleting user")
             }
         }
-        db_client.insert_user_to_postgres(&user).await.unwrap();
+        db_client.postgres_insert_user(&user).await.unwrap();
 
         let (response, status_code) = get_authenticate_endpoint_response_and_status_code(
             test_password.get_password(),
@@ -82,7 +82,7 @@ pub(super) mod tests {
         );
         //logs::setup_logging().unwrap();
         let db_client = get_db_client().await;
-        let _ = db_client.delete_user_refresh_token_with_caching(420).await;
+        let _ = db_client.cached_delete_user_refresh_token(420).await;
         let refresh_token = get_refresh_token_from_authenticate_endpoint(
             app.clone()
         ).await;
@@ -110,7 +110,7 @@ pub(super) mod tests {
         println!("Response: {}", body_str);
         assert_eq!(status_code.as_u16(), 200);
 
-        db_client.delete_user_from_postgres_by_id(420).await.unwrap();
+        db_client.postgres_delete_user_by_id(420).await.unwrap();
     }
 
     #[tokio::test]

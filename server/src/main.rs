@@ -37,10 +37,7 @@ mod app_objects;
 mod state;
 mod credentials;
 
-use server::{
-    start_main_server,
-    start_metrics_server
-};
+use server::start_main_server;
 
 
 #[tokio::main]
@@ -97,8 +94,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             cloudflare_validation_state.clone(),
             cloudflare_validation_middleware
         ));
-        // .with_state(db_client)
-        // .with_state(cloudflare_ips);
 
     let server_tls_config: Option<RustlsConfig> = {
         if config.server.enable_https {

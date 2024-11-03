@@ -68,7 +68,7 @@ pub(super) mod tests {
         );
         //logs::setup_logging().unwrap();
         let db_client = get_db_client().await;
-        let _ = db_client.delete_user_refresh_token_with_caching(420).await;
+        let _ = db_client.cached_delete_user_refresh_token(420).await;
         let access_token = get_authorization_token_from_refresh_token_endpoint(
             app.clone()
         ).await;
@@ -97,7 +97,7 @@ pub(super) mod tests {
         println!("Response: {}", body_str);
         assert_eq!(status_code.as_u16(), 200);
 
-        db_client.delete_user_from_postgres_by_id(420).await.unwrap();
+        db_client.postgres_delete_user_by_id(420).await.unwrap();
     }
 
     #[tokio::test]

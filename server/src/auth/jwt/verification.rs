@@ -36,11 +36,13 @@ impl VerificationError {
         }
     }
 
-    pub fn to_auth_error(&self) -> AuthError {
-        AuthError::InternalError(
-            self.into_internal_error_code()
-        )
-    }
+    // pub fn to_auth_error(&self) -> AuthError {
+    //     match self {
+    //         VerificationError::InvalidToken => AuthError::InvalidToken,
+    //         VerificationError::ExpiredToken => AuthError::ExpiredToken,
+    //         VerificationError::JWTError { source: _ } => AuthError::InvalidToken,
+    //     }
+    // }
 }
 
 impl From<VerificationError> for AuthError {
@@ -58,6 +60,7 @@ impl From<jsonwebtoken::errors::Error> for VerificationError {
     fn from(err: jsonwebtoken::errors::Error) -> Self {
         match err.kind() {
             jsonwebtoken::errors::ErrorKind::ExpiredSignature => Self::ExpiredToken,
+            jsonwebtoken::errors::ErrorKind::InvalidToken => Self::InvalidToken,
             _ => Self::JWTError { source: err },
         }
     }

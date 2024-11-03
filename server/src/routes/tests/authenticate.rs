@@ -67,7 +67,7 @@ pub(super) mod tests {
     #[serial]
     async fn test_authenticate() {
         let db_client = get_db_client().await;
-        db_client.delete_password_hash_by_user_id_in_redis(420).await.unwrap();
+        db_client.redis_delete_password_hash_by_user_id(420).await.unwrap();
 
         let app = get_axum_app().await;
         let trace_layer = TraceLayer::new_for_http()
@@ -95,14 +95,14 @@ pub(super) mod tests {
             salt: salt_string.to_string(),
             ..User::default()
         };
-        let res = db_client.delete_user_from_postgres_by_id(420).await;
+        let res = db_client.postgres_delete_user_by_id(420).await;
         if res.is_err() {
             match res.err().unwrap() {
                 crate::database::DatabaseError::UserNotFound(_) => {},
                 _ => panic!("Error deleting user")
             }
         }
-        db_client.insert_user_to_postgres(&user).await.unwrap();
+        db_client.postgres_insert_user(&user).await.unwrap();
 
         let (response, status_code) = get_authenticate_endpoint_response_and_status_code(
             test_password.get_password(),
@@ -111,7 +111,7 @@ pub(super) mod tests {
         ).await;
         println!("Response: {}", response);
 
-        db_client.delete_user_from_postgres_by_id(420).await.unwrap();
+        db_client.postgres_delete_user_by_id(420).await.unwrap();
 
         assert_eq!(status_code, 200);
     }
@@ -121,7 +121,7 @@ pub(super) mod tests {
     #[serial]
     async fn test_authenticate_invalid_password() {
         let db_client = get_db_client().await;
-        db_client.delete_password_hash_by_user_id_in_redis(420).await.unwrap();
+        db_client.redis_delete_password_hash_by_user_id(420).await.unwrap();
 
         let app = get_axum_app().await;
         let trace_layer = TraceLayer::new_for_http()
@@ -149,14 +149,14 @@ pub(super) mod tests {
             salt: salt_string.to_string(),
             ..User::default()
         };
-        let res = db_client.delete_user_from_postgres_by_id(420).await;
+        let res = db_client.postgres_delete_user_by_id(420).await;
         if res.is_err() {
             match res.err().unwrap() {
                 crate::database::DatabaseError::UserNotFound(_) => {},
                 _ => panic!("Error deleting user")
             }
         }
-        db_client.insert_user_to_postgres(&user).await.unwrap();
+        db_client.postgres_insert_user(&user).await.unwrap();
 
         let (response, status_code) = get_authenticate_endpoint_response_and_status_code(
             format!("{}INVALID", test_password.get_password()).as_str(),
@@ -165,7 +165,7 @@ pub(super) mod tests {
         ).await;
         println!("Response: {}", response);
 
-        db_client.delete_user_from_postgres_by_id(420).await.unwrap();
+        db_client.postgres_delete_user_by_id(420).await.unwrap();
 
         let response: serde_json::Value = serde_json::from_str(&response).unwrap();
         assert_eq!(response["error"], "Wrong credentials");
@@ -176,7 +176,7 @@ pub(super) mod tests {
     #[serial]
     async fn test_authenticate_invalid_email() {
         let db_client = get_db_client().await;
-        db_client.delete_password_hash_by_user_id_in_redis(420).await.unwrap();
+        db_client.redis_delete_password_hash_by_user_id(420).await.unwrap();
 
         let app = get_axum_app().await;
         let trace_layer = TraceLayer::new_for_http()
@@ -204,14 +204,14 @@ pub(super) mod tests {
             salt: salt_string.to_string(),
             ..User::default()
         };
-        let res = db_client.delete_user_from_postgres_by_id(420).await;
+        let res = db_client.postgres_delete_user_by_id(420).await;
         if res.is_err() {
             match res.err().unwrap() {
                 crate::database::DatabaseError::UserNotFound(_) => {},
                 _ => panic!("Error deleting user")
             }
         }
-        db_client.insert_user_to_postgres(&user).await.unwrap();
+        db_client.postgres_insert_user(&user).await.unwrap();
 
         let (response, status_code) = get_authenticate_endpoint_response_and_status_code(
             test_password.get_password(),
@@ -220,7 +220,7 @@ pub(super) mod tests {
         ).await;
         println!("Response: {}", response);
 
-        db_client.delete_user_from_postgres_by_id(420).await.unwrap();
+        db_client.postgres_delete_user_by_id(420).await.unwrap();
         let response: serde_json::Value = serde_json::from_str(&response).unwrap();
         assert_eq!(response["error"], "Wrong credentials");
 
