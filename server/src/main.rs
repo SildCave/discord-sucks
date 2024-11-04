@@ -1,32 +1,6 @@
 #![feature(test)]
 #![feature(trivial_bounds)]
 
-use auth::JWTKeys;
-use axum::middleware;
-use axum_server::tls_rustls::RustlsConfig;
-use cloudflare::cloudflare_validation_middleware;
-use reqwest::Method;
-use routes::configure_routes;
-use tokio::sync::RwLock;
-use tracing::info;
-
-
-use std::{
-    net::SocketAddr,
-    path::PathBuf,
-    sync::Arc,
-    time::Duration
-};
-use tower_http::{
-    cors::{
-        Any, CorsLayer,
-    },
-    services::ServeDir,
-    trace::{DefaultMakeSpan, TraceLayer},
-};
-
-use axum_client_ip::SecureClientIpSource;
-
 mod database;
 mod configuration;
 mod logs;
@@ -36,8 +10,34 @@ mod auth;
 mod app_objects;
 mod state;
 mod credentials;
+mod registration;
 
 use server::start_main_server;
+use auth::JWTKeys;
+use axum::middleware;
+use axum_server::tls_rustls::RustlsConfig;
+use cloudflare::cloudflare_validation_middleware;
+use reqwest::Method;
+use routes::configure_routes;
+use tokio::sync::RwLock;
+use tracing::info;
+
+use std::{
+    net::SocketAddr,
+    path::PathBuf,
+    sync::Arc,
+    time::Duration
+};
+
+use tower_http::{
+    cors::{
+        Any, CorsLayer,
+    },
+    services::ServeDir,
+    trace::{DefaultMakeSpan, TraceLayer},
+};
+
+use axum_client_ip::SecureClientIpSource;
 
 
 #[tokio::main]

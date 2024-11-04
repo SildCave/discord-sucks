@@ -68,8 +68,8 @@ impl DatabaseClientWithCaching {
     ) -> Result<(), DatabaseError> {
         let res = sqlx::query!(
             r#"
-            INSERT INTO users (id, username, password_hash, salt, email, created_at, valid_refresh_token, verified, banned)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO users (id, username, password_hash, salt, email, created_at, valid_refresh_token, verified, banned, date_of_birth)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             "#,
             user.id,
             user.username,
@@ -79,7 +79,8 @@ impl DatabaseClientWithCaching {
             user.created_at,
             user.valid_refresh_token,
             user.verified,
-            user.banned
+            user.banned,
+            user.date_of_birth
         )
         .execute(&self.postgres_con)
         .await?;

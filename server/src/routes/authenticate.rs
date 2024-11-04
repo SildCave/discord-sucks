@@ -1,4 +1,15 @@
 // TODO: https://github.com/tokio-rs/axum/blob/main/examples/jwt/src/main.rs
+
+use crate::{
+    auth::{
+        AuthError,
+        AuthenticationBody,
+        AuthenticationPayload,
+        ClaimType,
+        Claims,
+    }, credentials::Password, state::AuthenticationState
+};
+
 use axum::{
     extract::State,
     http::{
@@ -13,18 +24,13 @@ use jsonwebtoken::{
     Header
 };
 use reqwest::header::SET_COOKIE;
-use tracing::{error, info, instrument};
-use uuid::Uuid;
-use std::sync::Arc;
-use crate::{
-    auth::{
-        AuthError,
-        AuthenticationBody,
-        AuthenticationPayload,
-        ClaimType,
-        Claims,
-    }, credentials::Password, state::AuthenticationState
+use tracing::{
+    error,
+    info
 };
+use uuid::Uuid;
+
+use std::sync::Arc;
 
 // FIX TRACING ON ASYNC
 

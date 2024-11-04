@@ -10,5 +10,6 @@ CREATE TABLE
         created_at BIGINT NOT NULL,
         valid_refresh_token VARCHAR(1024),
         verified BOOLEAN NOT NULL,
-        banned BOOLEAN NOT NULL
+        banned BOOLEAN NOT NULL,
+        date_of_birth DATE NOT NULL
     );

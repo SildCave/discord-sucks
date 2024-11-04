@@ -1,6 +1,8 @@
 mod password_preparation;
 mod password;
 
+mod tests;
+
 pub use password::{
     Password,
     PasswordError,

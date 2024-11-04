@@ -1,5 +1,10 @@
 mod state;
-mod middleware;
+mod extractor;
+mod validation;
+mod tests;
+
+pub use state::TurnstileState;
+pub use extractor::TurnstileResult;
 
 use serde_json::json;
 use axum::{
@@ -12,25 +17,16 @@ use axum::{
 };
 
 
-pub use middleware::{
-    TurnstileResult,
-    turnstile_verification
-};
-pub use state::CloudflareTurnstileState;
-
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TurnstileError {
-    MissingTurnstileHeader,
-    InvalidTurnstileToken,
+    InvalidBody,
     InternalError(&'static str),
 }
 
 impl IntoResponse for TurnstileError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
-            TurnstileError::MissingTurnstileHeader => (StatusCode::BAD_REQUEST, "Missing Turnstile header"),
-            TurnstileError::InvalidTurnstileToken => (StatusCode::BAD_REQUEST, "Invalid Turnstile token"),
+            TurnstileError::InvalidBody => (StatusCode::BAD_REQUEST, "Invalid body, cf-turnstile-response is required"),
             TurnstileError::InternalError(error_message) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, error_message)
             },

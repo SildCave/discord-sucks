@@ -38,3 +38,15 @@
 | InvalidToken | 1400 |
 | ExpiredToken | 1401 |
 | JWTError     | 1402 |
+
+## Turnstile Error Codes
+| Error    | Code |
+| -------- | ------- |
+| ReqwestError                 | 1500 |
+| RequestNotSuccessful         | 1501 |
+| RequestTextError             | 1502 |
+| RequestJsonError             | 1503 |
+| RequestErrorSuccessIsNone    | 1504 |
+| InvalidInputSecret           | 1505 |
+| InvalidInputResponse         | 1506 |
+| InputTokenTimeoutOrDuplicate | 1507 |

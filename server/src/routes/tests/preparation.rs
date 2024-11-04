@@ -11,7 +11,13 @@ mod preparation {
     pub fn get_config() -> Config {
         let mut cfg_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         cfg_path.push("../configuration/server/config.toml");
-        Config::from_file(cfg_path).unwrap()
+        let mut cfg = Config::from_file(cfg_path).unwrap();
+        let mut turnstile_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        turnstile_path.push("..");
+        turnstile_path.push(&cfg.cloudflare.turnstile_secret_key_path);
+        cfg.cloudflare.turnstile_secret_key_path = turnstile_path.to_str().unwrap().to_string();
+
+        cfg
     }
 
     pub async fn get_db_client() -> DatabaseClientWithCaching {

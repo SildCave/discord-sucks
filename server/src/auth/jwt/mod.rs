@@ -4,7 +4,7 @@ mod extractors;
 
 mod verification;
 
-mod authorization_middleware;
+mod authorization_extractor;
 
 pub use extractors::extract_token_from_cookie;
 

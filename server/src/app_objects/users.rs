@@ -1,3 +1,7 @@
+use chrono::{
+    NaiveDate
+};
+
 #[derive(Debug, PartialEq)]
 pub struct User {
     pub id: i64,
@@ -9,6 +13,7 @@ pub struct User {
     pub valid_refresh_token: Option<String>,
     pub verified: bool,
     pub banned: bool,
+    pub date_of_birth: NaiveDate
 }
 
 
@@ -24,6 +29,7 @@ impl Default for User {
             valid_refresh_token: None,
             verified: true,
             banned: false,
+            date_of_birth: NaiveDate::default()
         }
     }
     

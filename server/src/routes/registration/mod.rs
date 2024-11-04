@@ -1,3 +1,3 @@
-mod register_user_credentials;
+mod register_user_credential_based;
 
-pub use register_user_credentials::register_user;
+pub use register_user_credential_based::register_user;

@@ -9,7 +9,7 @@ mod tests;
 use std::sync::Arc;
 
 use axum::{
-    middleware, routing::{
+    routing::{
         get,
         post
     }, Router
@@ -19,13 +19,24 @@ use hello_world::hello_world;
 use secured::secured;
 use authenticate::authenticate;
 
-use crate::{auth::JWTKeys, cloudflare::{turnstile_verification, CloudflareTurnstileState}, configuration::{self, JWTConfig}, credentials::PasswordRequirements, database::DatabaseClientWithCaching, state::{ApiState, AuthenticationState, RefreshState}};
+use crate::{
+    auth::JWTKeys,
+    cloudflare::TurnstileState,
+    configuration::Config,
+    credentials::PasswordRequirements,
+    database::DatabaseClientWithCaching,
+    state::{
+        ApiState,
+        AuthenticationState,
+        RefreshState
+    }
+};
 
 pub async fn configure_routes(
     jwt_keys: &JWTKeys,
     db_client: DatabaseClientWithCaching,
     password_requirements: PasswordRequirements,
-    config: &configuration::Config
+    config: &Config
 ) -> Router {
     let authentication_state = AuthenticationState {
         jwt_keys: jwt_keys.clone(),
@@ -39,7 +50,7 @@ pub async fn configure_routes(
         db_client: db_client.clone(),
     };
 
-    let turnstile_state = CloudflareTurnstileState::new(
+    let turnstile_state = TurnstileState::new(
         &config
     ).unwrap();
 
@@ -57,12 +68,7 @@ pub async fn configure_routes(
         .route("/secured", get(secured))
             .with_state(jwt_keys.clone())
         .route("/register_user", post(registration::register_user))
-            .route_layer(
-                middleware::from_fn_with_state(
-                    turnstile_state.clone(), turnstile_verification
-                )
-            )
-        //.route("/health", axum::handler::get(|| async { "OK" }))
+            .with_state(turnstile_state)
 }
 
 // curl -s \
