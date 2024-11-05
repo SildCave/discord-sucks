@@ -13,6 +13,15 @@ allow_non_cloudflare_ips = true
 cloudflare_ips_refresh_interval_s = 5
 cloudflare_ips_refresh_interval_jitter_s = 10
 
+[smtp]
+smtp_username = "postmaster@email.discord-sucks.usiiaa.top"
+smtp_password_path = "configuration/server/smtp_password.txt"
+smtp_host = "smtp.eu.mailgun.org"
+
+[verification_email]
+email_sender_name = "Discord Sucks"
+email_sender_email_address = "verification@email.discord-sucks.usiiaa.top"
+
 [jwt]
 refresh_key_lifetime_s = 1000
 access_key_lifetime_s = 300

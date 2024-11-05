@@ -5,3 +5,5 @@ configuration/mongodb/mongodb_client_pass.txt
 configuration/server/jwt_secret.txt
 target/
 configuration/redis/data/*
+configuration/server/smtp_password.txt
+configuration/server/turnstile_secret.txt

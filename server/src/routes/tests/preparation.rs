@@ -15,6 +15,12 @@ mod preparation {
         let mut turnstile_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         turnstile_path.push("..");
         turnstile_path.push(&cfg.cloudflare.turnstile_secret_key_path);
+
+        let mut smtp_password_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        smtp_password_path.push("..");
+        smtp_password_path.push(&cfg.smtp.smtp_password_path);
+
+        cfg.smtp.smtp_password_path = smtp_password_path.to_str().unwrap().to_string();
         cfg.cloudflare.turnstile_secret_key_path = turnstile_path.to_str().unwrap().to_string();
 
         cfg

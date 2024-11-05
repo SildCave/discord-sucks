@@ -11,6 +11,7 @@ mod app_objects;
 mod state;
 mod credentials;
 mod registration;
+mod email;
 
 use server::start_main_server;
 use auth::JWTKeys;

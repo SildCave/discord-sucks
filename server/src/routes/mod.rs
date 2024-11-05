@@ -20,12 +20,7 @@ use secured::secured;
 use authenticate::authenticate;
 
 use crate::{
-    auth::JWTKeys,
-    cloudflare::TurnstileState,
-    configuration::Config,
-    credentials::PasswordRequirements,
-    database::DatabaseClientWithCaching,
-    state::{
+    auth::JWTKeys, cloudflare::TurnstileState, configuration::Config, credentials::PasswordRequirements, database::DatabaseClientWithCaching, email::EmailHandler, state::{
         ApiState,
         AuthenticationState,
         RefreshState
@@ -54,11 +49,17 @@ pub async fn configure_routes(
         &config
     ).unwrap();
 
+    let email_handler = EmailHandler::new(
+        &config,
+        config.verification_email.email_sender_email_address.clone(),
+        config.verification_email.email_sender_name.clone()
+    ).unwrap();
+
     let api_state = ApiState {
         authentication: Arc::new(authentication_state),
         refresh: Arc::new(refresh_state),
     };
-
+    
     Router::new()
         .route("/", get(hello_world))
         .route("/authenticate", post(authenticate))

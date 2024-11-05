@@ -16,6 +16,8 @@ pub struct Config {
     pub jwt_config: JWTConfig,
     pub password_requirements: PasswordRequirements,
     pub cloudflare: Cloudflare,
+    pub smtp: SMTPConfig,
+    pub verification_email: VerificationEmail,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -26,6 +28,19 @@ pub struct ServerConfig {
     pub pem_cert_path: Option<String>,
     pub pem_key_path: Option<String>,
     pub domain: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SMTPConfig {
+    pub smtp_username: String,
+    pub smtp_password_path: String,
+    pub smtp_host: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct VerificationEmail {
+    pub email_sender_name: String,
+    pub email_sender_email_address: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
