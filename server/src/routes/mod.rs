@@ -4,7 +4,7 @@ mod authenticate;
 mod refresh_token;
 mod registration;
 
-mod tests;
+pub mod tests;
 
 use std::sync::Arc;
 
@@ -50,9 +50,7 @@ pub async fn configure_routes(
     ).unwrap();
 
     let email_handler = EmailHandler::new(
-        &config,
-        config.verification_email.email_sender_email_address.clone(),
-        config.verification_email.email_sender_name.clone()
+        &config
     ).unwrap();
 
     let api_state = ApiState {

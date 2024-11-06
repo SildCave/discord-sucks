@@ -13,5 +13,8 @@ pub use claims::{
     ClaimType
 };
 
-pub use verification::verify_token;
+pub use verification::{
+    verify_token,
+    VerificationError
+};
 pub use keys::JWTKeys;

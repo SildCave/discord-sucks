@@ -41,6 +41,9 @@ pub struct SMTPConfig {
 pub struct VerificationEmail {
     pub email_sender_name: String,
     pub email_sender_email_address: String,
+    pub email_subject: String,
+    pub verification_url_domain: String,
+    pub verification_url_endpoint: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

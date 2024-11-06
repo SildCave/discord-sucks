@@ -29,7 +29,7 @@ cookie = "0.18.1"
 thiserror = "1.0.65"
 argon2 = "0.5.3"
 uuid = { version = "1.11.0", features = ["v4"] }
-lettre = { version = "0.11.10", features = ["rustls-tls"] }
+lettre = "0.11.10"
 
 
 [dev-dependencies]

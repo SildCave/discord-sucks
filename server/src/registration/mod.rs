@@ -1,3 +1,6 @@
 mod credential_based;
 
-pub use credential_based::CredentialBasedRegistrationPayload;
+pub use credential_based::{
+    CredentialBasedRegistrationPayload,
+    UserRegistrationFormJWT
+};

@@ -20,6 +20,11 @@ mod preparation {
         smtp_password_path.push("..");
         smtp_password_path.push(&cfg.smtp.smtp_password_path);
 
+        let mut jwt_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        jwt_path.push("../configuration/server/jwt_secret.txt");
+
+
+        cfg.jwt_config.jwt_secret_path = jwt_path.to_str().unwrap().to_string();
         cfg.smtp.smtp_password_path = smtp_password_path.to_str().unwrap().to_string();
         cfg.cloudflare.turnstile_secret_key_path = turnstile_path.to_str().unwrap().to_string();
 

@@ -9,10 +9,13 @@ use axum::{
 use serde_json::json;
 
 mod payload;
-mod user_registration_form;
+mod user_form_for_jwt;
 mod extractor;
 
 pub use payload::CredentialBasedRegistrationPayload;
+pub use user_form_for_jwt::UserRegistrationFormJWT;
+
+
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum RegistrationError {

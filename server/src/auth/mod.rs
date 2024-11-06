@@ -13,7 +13,8 @@ pub use authentication::{
 pub use jwt::{
     ClaimType,
     extract_token_from_cookie,
-    verify_token
+    verify_token,
+    VerificationError
 };
 
 use serde_json::json;

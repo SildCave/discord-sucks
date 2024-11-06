@@ -1,4 +1,4 @@
-mod preparation;
+pub mod preparation;
 
 mod authenticate;
 mod refresh_token;
