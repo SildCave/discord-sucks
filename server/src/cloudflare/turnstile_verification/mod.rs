@@ -4,7 +4,11 @@ mod validation;
 mod tests;
 
 pub use state::TurnstileState;
-pub use extractor::TurnstileResult;
+pub use extractor::{
+    TurnstileRequest,
+    TurnstileResult,
+    GetTurnstileCode
+};
 
 use serde_json::json;
 use axum::{

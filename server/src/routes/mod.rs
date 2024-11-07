@@ -23,7 +23,7 @@ use crate::{
     auth::JWTKeys, cloudflare::TurnstileState, configuration::Config, credentials::PasswordRequirements, database::DatabaseClientWithCaching, email::EmailHandler, state::{
         ApiState,
         AuthenticationState,
-        RefreshState
+        RefreshState, RegisterUserCredentialBasedState
     }
 };
 
@@ -31,6 +31,8 @@ pub async fn configure_routes(
     jwt_keys: &JWTKeys,
     db_client: DatabaseClientWithCaching,
     password_requirements: PasswordRequirements,
+    turnstile_state: &TurnstileState,
+    email_handler: &EmailHandler,
     config: &Config
 ) -> Router {
     let authentication_state = AuthenticationState {
@@ -44,18 +46,17 @@ pub async fn configure_routes(
         jwt_config: config.jwt_config.clone(),
         db_client: db_client.clone(),
     };
+    let register_user_credential_based_state = RegisterUserCredentialBasedState {
+        email_handler: email_handler.clone(),
+        turnstile_state: turnstile_state.clone(),
+        jwt_keys: jwt_keys.clone(),
+    };
 
-    let turnstile_state = TurnstileState::new(
-        &config
-    ).unwrap();
-
-    let email_handler = EmailHandler::new(
-        &config
-    ).unwrap();
 
     let api_state = ApiState {
         authentication: Arc::new(authentication_state),
         refresh: Arc::new(refresh_state),
+        register_user_credential_based: Arc::new(register_user_credential_based_state),
     };
     
     Router::new()
@@ -67,7 +68,7 @@ pub async fn configure_routes(
         .route("/secured", get(secured))
             .with_state(jwt_keys.clone())
         .route("/register_user", post(registration::register_user))
-            .with_state(turnstile_state)
+            .with_state(api_state.clone())
 }
 
 // curl -s \

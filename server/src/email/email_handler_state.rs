@@ -1,10 +1,10 @@
-use lettre::{message::Mailbox, transport::smtp::authentication::Credentials, Address, SmtpTransport};
+use lettre::{message::Mailbox, transport::smtp::authentication::Credentials, Address, AsyncSmtpTransport, Executor, SmtpTransport, Tokio1Executor};
 
 use super::email_verification::EmailVerificationEmailState;
 
 #[derive(Debug, Clone, Copy)]
 pub struct EmailHandlerState {
-    mailer: &'static SmtpTransport,
+    mailer: &'static AsyncSmtpTransport<Tokio1Executor>,
     pub verification_email_state: &'static EmailVerificationEmailState,
 }
 
@@ -16,14 +16,15 @@ impl EmailHandlerState {
         smtp_host: T,
         verification_email_state: EmailVerificationEmailState
 
-    ) -> Self
-    where T: AsRef<str> {
+    ) -> EmailHandlerState
+    where
+        T: AsRef<str> {
 
         let smtp_credentials = Credentials::new(
             smtp_username.as_ref().to_string(),
             smtp_password.as_ref().to_string()
         );
-        let mailer = SmtpTransport::relay(
+        let mailer = AsyncSmtpTransport::<Tokio1Executor>::relay(
             smtp_host.as_ref()
         ).unwrap().credentials(
             smtp_credentials
@@ -39,7 +40,7 @@ impl EmailHandlerState {
         }
     }
 
-    pub fn mailer(&self) -> &'static SmtpTransport {
+    pub fn mailer(&self) -> &'static AsyncSmtpTransport<Tokio1Executor> {
         self.mailer
     }
 }

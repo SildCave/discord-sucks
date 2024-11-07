@@ -12,25 +12,23 @@ mod tests {
 
     use pretty_assertions::assert_eq;
 
-    #[test]
-    fn test_email_handler_error() {
+    #[tokio::test]
+    async fn test_email_handler_error() {
         let config = preparation::get_config();
         let email_handler = EmailHandler::new(&config).unwrap();
 
         let recipient: Mailbox = "bogolskibob56@gmail.com".parse().unwrap();
-        let author: Mailbox = config.verification_email.email_sender_email_address.parse().unwrap();
 
-        let email = EmailHandler::create_email_verification_email(
-            author,
+        let email = email_handler.create_email_verification_email(
             recipient,
             "test".to_string()
         ).unwrap();
 
-        email_handler.send_email(&email).unwrap();
+        email_handler.send_email(email).await.unwrap();
     }
 
-    #[test]
-    fn test_user_to_jwt_and_the_other_way_around() {
+    #[tokio::test]
+    async fn test_user_to_jwt_and_the_other_way_around() {
         let config = preparation::get_config();
 
         let registration_form = UserRegistrationFormJWT::new(
@@ -47,8 +45,8 @@ mod tests {
         assert_eq!(registration_form, registration_form_from_jwt);
     }
 
-    #[test]
-    fn test_user_to_jwt_and_the_other_way_around_with_expired_token() {
+    #[tokio::test]
+    async fn test_user_to_jwt_and_the_other_way_around_with_expired_token() {
         let config = preparation::get_config();
 
         let registration_form = UserRegistrationFormJWT::new(

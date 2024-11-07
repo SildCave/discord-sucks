@@ -13,11 +13,12 @@ mod credentials;
 mod registration;
 mod email;
 
+use email::EmailHandler;
 use server::start_main_server;
 use auth::JWTKeys;
 use axum::middleware;
 use axum_server::tls_rustls::RustlsConfig;
-use cloudflare::cloudflare_validation_middleware;
+use cloudflare::{cloudflare_validation_middleware, TurnstileState};
 use reqwest::Method;
 use routes::configure_routes;
 use tokio::sync::RwLock;
@@ -64,7 +65,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &config.postgres_database
     ).await?;
 
+    let turnstile_state = TurnstileState::new(
+        &config
+    ).unwrap();
 
+    let email_handler = EmailHandler::new(
+        &config
+    ).unwrap();
 
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
@@ -76,12 +83,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .make_span_with(
             DefaultMakeSpan::default().include_headers(true)
         );
-
+    
     let password_requirements = config.password_requirements.clone();
     let app = configure_routes(
         &jwt_keys,
         db_client.clone(),
         password_requirements,
+        &turnstile_state,
+        &email_handler,
         &config
     ).await;
     let app = app

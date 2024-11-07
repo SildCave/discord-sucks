@@ -24,6 +24,7 @@ email_sender_email_address = "verification@email.discord-sucks.usiiaa.top"
 email_subject = "Discord-Sucks verify your email address"
 verification_url_domain = "https://discord-sucks.usiiaa.top"
 verification_url_endpoint = "/verify_email"
+email_verification_jwt_lifetime_s = 300
 
 [jwt]
 refresh_key_lifetime_s = 1000

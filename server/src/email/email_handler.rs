@@ -5,14 +5,13 @@ use super::{
 };
 
 use lettre::{
-    Address,
-    Message, Transport
+    Address, AsyncTransport, Executor, Message, Tokio1Executor, Transport
 };
 
 #[derive(Debug, Clone, Copy)]
 pub struct EmailHandler {
-    state: &'static EmailHandlerState,
-    smtp_host: &'static str,
+    pub state: &'static EmailHandlerState,
+    //smtp_host: &'static str,
 }
 
 impl EmailHandler {
@@ -34,6 +33,7 @@ impl EmailHandler {
             email_subject: config.verification_email.email_subject.clone(),
             verification_url_domain: config.verification_email.verification_url_domain.clone(),
             verification_url_endpoint: config.verification_email.verification_url_endpoint.clone(),
+            email_verification_jwt_lifetime_s: config.verification_email.email_verification_jwt_lifetime_s,
         };
 
 
@@ -43,26 +43,26 @@ impl EmailHandler {
             smtp_host,
             verification_email_state
         );
-        let smtp_host = Box::leak(
-            Into::<String>::into(
-                smtp_host
-            ).into_boxed_str()
-        );
+        // let smtp_host = Box::leak(
+        //     Into::<String>::into(
+        //         smtp_host
+        //     ).into_boxed_str()
+        // );
 
         Ok(Self {
             state: Box::leak(
                 Box::new(state)
             ),
-            smtp_host,
+            //smtp_host,
         })
     }
 
-    pub fn send_email(
+    pub async fn send_email(
         &self,
-        mail: &Message
+        mail: Message
     ) -> Result<(), EmailHandlerError> {
 
-        self.state.mailer().send(mail)
+        self.state.mailer().send(mail).await
             .map_err(
                 |e| EmailHandlerError::EmailSendingFailed(e.to_string())
             )?;

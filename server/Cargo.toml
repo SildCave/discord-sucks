@@ -29,7 +29,8 @@ cookie = "0.18.1"
 thiserror = "1.0.65"
 argon2 = "0.5.3"
 uuid = { version = "1.11.0", features = ["v4"] }
-lettre = "0.11.10"
+lettre = { version = "0.11.10", features = ["tokio1", "tokio1-native-tls"]}
+time = { version = "0.3.36", features = ["serde"] }
 
 
 [dev-dependencies]

@@ -5,7 +5,14 @@
 mod tests {
     use std::path::PathBuf;
 
-    use crate::{cloudflare::{turnstile_verification::{validation::validate_turnstile_response, TurnstileError}, TurnstileResult, TurnstileState}, configuration::Config};
+    use crate::{
+        cloudflare::{
+            turnstile_verification::TurnstileError,
+            TurnstileResult,
+            TurnstileState
+        },
+        configuration::Config
+    };
 
     use pretty_assertions::assert_eq;
 
@@ -43,8 +50,7 @@ mod tests {
     async fn test_working_turnstile_test_key() {
         let key = "1x0000000000000000000000000000000AA".to_string();
         let state = get_state(key).await;
-        let res = validate_turnstile_response(
-            &state,
+        let res = state.validate_cf_turnstile_response(
             &"XXXX.DUMMY.TOKEN.XXXX".to_string()
         ).await;
         assert_eq!(res.is_ok(), true);
@@ -57,8 +63,7 @@ mod tests {
     async fn test_always_failing_turnstile_test_key() {
         let key = "2x0000000000000000000000000000000AA".to_string();
         let state = get_state(key).await;
-        let res = validate_turnstile_response(
-            &state,
+        let res = state.validate_cf_turnstile_response(
             &"XXXX.DUMMY.TOKEN.XXXX".to_string()
         ).await;
         assert_eq!(res.is_ok(), false);
@@ -70,8 +75,7 @@ mod tests {
     async fn test_invalid_turnstile_test_key() {
         let key = "3x0000000000000000000000000000000AA".to_string();
         let state = get_state(key).await;
-        let res = validate_turnstile_response(
-            &state,
+        let res = state.validate_cf_turnstile_response(
             &"XXXX.DUMMY.TOKEN.XXXX".to_string()
         ).await;
         assert_eq!(res.is_ok(), false);

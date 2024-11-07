@@ -1,7 +1,6 @@
 use super::{
     state::TurnstileState,
     TurnstileError,
-    validation::validate_turnstile_response
 };
 
 use std::boxed::Box;
@@ -31,65 +30,49 @@ pub enum TurnstileResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
-struct TurnstileRequest {
+pub struct TurnstileRequest {
     #[serde(rename = "cf-turnstile-response")]
-    cf_turnstile_response: String,
+    pub cf_turnstile_response: String,
 }
 
-#[async_trait]
-impl FromRequest<TurnstileState> for TurnstileResult
+
+pub trait GetTurnstileCode {
+    fn get_turnstile_code(&self) -> String;
+}
+
+
+impl TurnstileState
 {
 
-    type Rejection = TurnstileError;
-    async fn from_request(
-        req: Request,
-        state: &TurnstileState
-    ) -> Result<Self, Self::Rejection> {
-        let content_type_header = req.headers().get(CONTENT_TYPE);
-        let content_type = content_type_header.and_then(|value| value.to_str().ok());
+    pub async fn verify_turnstile_from_request(
+        &self,
+        request: &impl GetTurnstileCode,
+    ) -> Result<TurnstileResult, TurnstileError> {
 
-        if let Some(content_type) = content_type {
-            if content_type.starts_with("application/json") {
-                let Json(payload): Json<TurnstileRequest> = req.extract().await.map_err(|_| TurnstileError::InvalidBody)?;
-                if state.allow_invalid_turnstile {
-                    return Ok(TurnstileResult::Allowed);
-                }
-                get_response_from_payload(
-                    state,
-                    payload
-                ).await?;
-            }
-            else if content_type.starts_with("application/x-www-form-urlencoded") {
-                let Form(payload): Form<TurnstileRequest> = req.extract().await.map_err(|_| TurnstileError::InvalidBody)?;
-                if state.allow_invalid_turnstile {
-                    return Ok(TurnstileResult::Allowed);
-                }
-                get_response_from_payload(
-                    state,
-                    payload
-                ).await?;
-            }
+        let turnstile_result = self.get_turnstile_result_from_turnstile_code(
+            request.get_turnstile_code()
+        ).await?;
+
+        Ok(turnstile_result)
+
+    }
+
+    async fn get_turnstile_result_from_turnstile_code(
+        &self,
+        code: String
+    ) -> Result<TurnstileResult, TurnstileError> {
+        let valid = self.validate_cf_turnstile_response(
+            &code
+        ).await;
+        if valid.is_err() {
+            let error = valid.unwrap_err();
+            error!("turnstile validation error: {:?}", error);
+            return Err(error);
         }
-        Err(TurnstileError::InvalidBody)
+        if valid.unwrap() == TurnstileResult::Denied {
+            return Ok(TurnstileResult::Denied);
+        }
+        Ok(TurnstileResult::Allowed)
     }
-
 }
 
-async fn get_response_from_payload(
-    state: &TurnstileState,
-    payload: TurnstileRequest
-) -> Result<TurnstileResult, TurnstileError> {
-    let valid = validate_turnstile_response(
-        state,
-        &payload.cf_turnstile_response
-    ).await;
-    if valid.is_err() {
-        let error = valid.unwrap_err();
-        error!("turnstile validation error: {:?}", error);
-        return Err(error);
-    }
-    if valid.unwrap() == TurnstileResult::Denied {
-        return Ok(TurnstileResult::Denied);
-    }
-    Ok(TurnstileResult::Allowed)
-}

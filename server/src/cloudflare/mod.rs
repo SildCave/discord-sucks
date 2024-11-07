@@ -13,4 +13,6 @@ pub use request_origin_verification::refresh::cloudflare_ip_refresh_cron_job;
 pub use turnstile_verification::{
     TurnstileResult,
     TurnstileState,
+    TurnstileRequest,
+    GetTurnstileCode
 };

@@ -44,6 +44,7 @@ pub struct VerificationEmail {
     pub email_subject: String,
     pub verification_url_domain: String,
     pub verification_url_endpoint: String,
+    pub email_verification_jwt_lifetime_s: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

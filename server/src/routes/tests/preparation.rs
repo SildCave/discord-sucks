@@ -4,8 +4,10 @@ pub use preparation::*;
 #[cfg(test)]
 mod preparation {
     use std::path::PathBuf;
+    use crate::cloudflare::TurnstileState;
     use crate::configuration::Config;
     use crate::database::DatabaseClientWithCaching;
+    use crate::email::EmailHandler;
     use crate::routes::configure_routes;
 
     pub fn get_config() -> Config {
@@ -48,10 +50,19 @@ mod preparation {
         let jwt_keys = crate::auth::JWTKeys::new(&config).unwrap();
         let db_client = get_db_client().await;
         let password_requirements = config.password_requirements.clone();
+        let turnstile_state = TurnstileState::new(
+            &config
+        ).unwrap();
+    
+        let email_handler = EmailHandler::new(
+            &config
+        ).unwrap();
         let app = configure_routes(
             &jwt_keys,
             db_client.clone(),
             password_requirements,
+            &turnstile_state,
+            &email_handler,
             &config
         ).await;
 
