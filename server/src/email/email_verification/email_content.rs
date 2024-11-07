@@ -3,7 +3,6 @@ use lettre::{message::Mailbox, Executor, Message};
 use crate::email::{EmailHandler, EmailHandlerError};
 
 
-const EMAIL_VERIFICATION_SUBJECT: &'static str = "Discord-Sucks email verification";
 
 impl EmailHandler{
     pub fn create_email_verification_email(
@@ -20,7 +19,9 @@ impl EmailHandler{
         let message = Message::builder()
             .from(email_author)
             .to(recipient)
-            .subject(EMAIL_VERIFICATION_SUBJECT)
+            .subject(
+                self.state.verification_email_state.email_subject.clone()
+            )
             .body(body)
             .map_err(
                 |e| EmailHandlerError::EmailCreationFailed(
