@@ -78,8 +78,7 @@ mod tests {
         let res = state.validate_cf_turnstile_response(
             &"XXXX.DUMMY.TOKEN.XXXX".to_string()
         ).await;
-        assert_eq!(res.is_ok(), false);
-        let error = res.unwrap_err();
-        assert_eq!(error, TurnstileError::InternalError("1507"));
+        assert_eq!(res.is_ok(), true);
+        assert_eq!(res.unwrap(), TurnstileResult::Denied);
     }
 }
