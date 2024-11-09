@@ -42,11 +42,15 @@
 ## Turnstile Error Codes
 | Error    | Code |
 | -------- | ------- |
-| ReqwestError                 | 1500 |
-| RequestNotSuccessful         | 1501 |
-| RequestTextError             | 1502 |
-| RequestJsonError             | 1503 |
-| RequestErrorSuccessIsNone    | 1504 |
-| InvalidInputSecret           | 1505 |
-| InvalidInputResponse         | 1506 |
-| InputTokenTimeoutOrDuplicate | 1507 |
+| ReqwestError          | 1500 |
+| RequestFailed         | 1501 |
+| DeserializationFailed | 1502 |
+| InvalidInputSecret    | 1503 |
+| InvalidInputResponse  | 1504 |
+| SuccessFieldNotFound  | 1505 |
+
+## Email Error Codes
+| Error    | Code |
+| -------- | ------- |
+| EmailCreationError     | 1600 |
+| EmailSendingFailed     | 1601 |

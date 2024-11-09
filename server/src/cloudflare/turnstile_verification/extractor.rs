@@ -63,13 +63,8 @@ impl TurnstileState
     ) -> Result<TurnstileResult, TurnstileError> {
         let valid = self.validate_cf_turnstile_response(
             &code
-        ).await;
-        if valid.is_err() {
-            let error = valid.unwrap_err();
-            error!("turnstile validation error: {:?}", error);
-            return Err(error);
-        }
-        if valid.unwrap() == TurnstileResult::Denied {
+        ).await?;
+        if valid == TurnstileResult::Denied {
             return Ok(TurnstileResult::Denied);
         }
         Ok(TurnstileResult::Allowed)

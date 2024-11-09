@@ -56,6 +56,7 @@ impl PasswordError {
 }
 
 
+#[derive(Debug, Serialize, Clone)]
 pub struct Password<'a> {
     password: &'a str,
     requirements: &'a PasswordRequirements,
@@ -124,7 +125,7 @@ impl <'b>Password<'b> {
         &self.password
     }
 
-    pub (super) fn check_if_password_is_valid_based_on_requirements(&self) -> Result<(), PasswordError> {
+    pub fn check_if_password_is_valid_based_on_requirements(&self) -> Result<(), PasswordError> {
         // Order of checks is important !!!
         if self.requirements.ascii_only {
             self.check_if_password_is_ascii()?;

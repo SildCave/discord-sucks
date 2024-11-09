@@ -41,7 +41,6 @@ ascii_only = true
 no_special_characters = true
 no_whitespaces = true
 
-
 [postgres_database]
 username = "admin"
 password = "password123"

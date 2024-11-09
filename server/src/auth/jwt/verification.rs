@@ -1,8 +1,11 @@
+use axum::{response::{IntoResponse, Response}, Json};
+use axum::http::StatusCode;
 use jsonwebtoken::{
   decode,
   Algorithm,
   Validation
 };
+use serde_json::json;
 
 use crate::auth::AuthError;
 
@@ -24,6 +27,20 @@ pub enum VerificationError {
     #[error(transparent)]
     JWTError {
         source: jsonwebtoken::errors::Error,
+    }
+}
+
+impl IntoResponse for VerificationError {
+    fn into_response(self) -> Response {
+        let (status, error_message) = match self {
+            VerificationError::InvalidToken => (StatusCode::UNAUTHORIZED, "Invalid token"),
+            VerificationError::ExpiredToken => (StatusCode::UNAUTHORIZED, "Expired token"),
+            VerificationError::JWTError { source: _ } => (StatusCode::UNAUTHORIZED, "1402"),
+        };
+        let body = Json(json!({
+            "error": error_message,
+        }));
+        (status, body).into_response()
     }
 }
 

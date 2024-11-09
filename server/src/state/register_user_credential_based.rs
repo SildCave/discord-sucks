@@ -1,4 +1,4 @@
-use crate::{auth::JWTKeys, cloudflare::TurnstileState, email::EmailHandler};
+use crate::{auth::JWTKeys, cloudflare::TurnstileState, credentials::PasswordRequirements, email::EmailHandler};
 
 
 
@@ -7,4 +7,5 @@ pub struct RegisterUserCredentialBasedState {
     pub email_handler: EmailHandler,
     pub turnstile_state: TurnstileState,
     pub jwt_keys: JWTKeys,
+    pub password_requirements: PasswordRequirements,
 }

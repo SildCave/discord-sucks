@@ -20,19 +20,50 @@ use axum::{
     Json
 };
 
+use tracing::error;
+use thiserror::Error;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Error)]
 pub enum TurnstileError {
+    #[error("Invalid body")]
     InvalidBody,
-    InternalError(&'static str),
+    #[error("Reqwest error: {0}")]
+    ReqwestError(#[from] reqwest::Error),
+    #[error("Request to turnstile failed, response: {0}")]
+    RequestFailed(String),
+    #[error("Turnstile response deserialization failed: {0}")]
+    DeserializationFailed(#[from] serde_json::Error),
+    #[error("Turnstile invalid input secret")]
+    InvalidInputSecret,
+    #[error("Turnstile invalid input response")]
+    InvalidInputResponse,
+    #[error("Invalid turnstile response, success field not found")]
+    SuccessFieldNotFound,
 }
 
 impl IntoResponse for TurnstileError {
     fn into_response(self) -> Response {
         let (status, error_message) = match self {
-            TurnstileError::InvalidBody => (StatusCode::BAD_REQUEST, "Invalid body, cf-turnstile-response is required"),
-            TurnstileError::InternalError(error_message) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, error_message)
+            TurnstileError::InvalidBody => {
+                (StatusCode::BAD_REQUEST, "Invalid body, cf-turnstile-response is required")
+            },
+            TurnstileError::ReqwestError(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "1500")
+            },
+            TurnstileError::RequestFailed(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "1501")
+            },
+            TurnstileError::DeserializationFailed(_) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "1502")
+            },
+            TurnstileError::InvalidInputSecret => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "1503")
+            },
+            TurnstileError::InvalidInputResponse => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "1504")
+            },
+            TurnstileError::SuccessFieldNotFound => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "1505")
             },
         };
         let body = Json(json!({

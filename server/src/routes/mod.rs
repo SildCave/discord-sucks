@@ -50,6 +50,7 @@ pub async fn configure_routes(
         email_handler: email_handler.clone(),
         turnstile_state: turnstile_state.clone(),
         jwt_keys: jwt_keys.clone(),
+        password_requirements: password_requirements.clone(),
     };
 
 
