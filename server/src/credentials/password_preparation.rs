@@ -56,7 +56,7 @@ impl Password<'_> {
             },
             SaltMode::Generate => {
                 SaltString::generate(&mut OsRng)
-            }
+            },
         };
         let salt_string = salt.to_string();
 

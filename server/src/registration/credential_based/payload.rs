@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use time::OffsetDateTime;
 use time::serde::rfc3339;
-
+use axum::Form;
 use crate::cloudflare::{GetTurnstileCode, TurnstileRequest};
+use crate::credentials::{Password, PasswordRequirements, SaltMode};
 use crate::registration::UserRegistrationFormJWT;
 // TODO - Implement OTP 2fa and add date of birth field to the db
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -18,7 +19,7 @@ pub struct CredentialBasedRegistrationPayload {
     cf_turnstile_response: String,
 }
 
-impl GetTurnstileCode for axum::Form<CredentialBasedRegistrationPayload> {
+impl GetTurnstileCode for Form<CredentialBasedRegistrationPayload> {
     fn get_turnstile_code(&self) -> String {
         self.cf_turnstile_response.clone()
     }
@@ -46,16 +47,21 @@ impl IntoResponse for CredentialBasedRegistrationPayloadError {
 }
 
 impl CredentialBasedRegistrationPayload {
-    pub fn into_jwt_form(
+    pub async fn into_jwt_form(
         &self,
         email_jwt_lifetime: i64
     ) -> Result<UserRegistrationFormJWT, CredentialBasedRegistrationPayloadError> {
+        let password = Password::new(
+            &self.password,
+            &PasswordRequirements::no_requirements()
+        ).hash_and_salt_password(&SaltMode::Generate).await.unwrap();
         let date_of_birth: NaiveDate = self.date_of_birth.parse().map_err(
             |_| CredentialBasedRegistrationPayloadError::InvalidBody
         )?;
         Ok(UserRegistrationFormJWT::new(
             self.email.clone(),
-            self.password.clone(),
+            password.password_hash,
+            password.salt,
             date_of_birth,
             chrono::Utc::now().timestamp() + email_jwt_lifetime
         ))

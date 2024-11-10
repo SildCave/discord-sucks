@@ -70,6 +70,8 @@ pub async fn configure_routes(
             .with_state(jwt_keys.clone())
         .route("/register_user", post(registration::register_user))
             .with_state(api_state.clone())
+        .route("/verify_email", post(registration::add_user_from_jwt_token))
+            .with_state(api_state.clone())
 }
 
 // curl -s \

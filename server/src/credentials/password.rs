@@ -91,6 +91,21 @@ impl Default for PasswordRequirements {
     }
 }
 
+impl PasswordRequirements {
+    pub fn no_requirements() -> Self {
+        Self {
+            expected_min_length: 0,
+            expected_max_length: usize::MAX,
+            must_contain_uppercase: false,
+            must_contain_symbol: false,
+            must_contain_number: false,
+            ascii_only: false,
+            no_special_characters: false,
+            no_whitespaces: false,
+        }
+    }
+}
+
 impl <'b>Password<'b> {
     pub fn new(
         password: &'b str,

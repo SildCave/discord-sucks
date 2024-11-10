@@ -33,7 +33,6 @@ pub(super) mod tests {
         let refresh_token = get_refresh_token_from_authenticate_endpoint(
             app.clone()
         ).await;
-
         println!("Refresh token: {}", refresh_token);
 
         let cookie = format!("refresh_token={}", refresh_token);

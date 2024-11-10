@@ -9,7 +9,6 @@ use reqwest::{
     multipart::Form,
 };
 
-use tracing::error;
 
 impl TurnstileState {
     // No logging in this function
@@ -17,17 +16,21 @@ impl TurnstileState {
         &self,
         cf_turnstile_response: &String,
     ) -> Result<TurnstileResult, TurnstileError> {
-        let client = Client::new();
+
         let form = Form::new()
             .text("response", cf_turnstile_response.clone())
             .text("secret", self.secret_key);
+
         let url = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
-        let response = client.post(url)
+
+        // imposter
+
+        let response = self.reqwest_client.post(url)
             .multipart(form)
             .send()
-            .await;
-
-        let response: reqwest::Response = response?;
+            .await?;
+        //
+        //return Ok(TurnstileResult::Denied);
 
         let response_status = response.status();
         let response_text = response.text().await?;
@@ -47,15 +50,12 @@ impl TurnstileState {
             if error_codes.len() > 0 {
                 let error_code = error_codes[0].as_str().unwrap();
                 if error_code == "invalid-input-secret" {
-                    error!("invalid server secret");
                     return Err(TurnstileError::InvalidInputSecret);
                 }
                 if error_code == "invalid-input-response" {
-                    error!("invalid response");
                     return Err(TurnstileError::InvalidInputResponse);
                 }
                 if error_code == "timeout-or-duplicate" {
-                    //error!("timeout or duplicate");
                     return Ok(TurnstileResult::Denied);
                 }
             }
@@ -68,7 +68,7 @@ impl TurnstileState {
         if !success {
             return Ok(TurnstileResult::Denied);
         }
-
+        
         Ok(TurnstileResult::Allowed)
     }
 }

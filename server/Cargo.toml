@@ -17,7 +17,7 @@ serde = { version = "1.0.209", features = ["derive"] }
 anyhow = "1.0.86"
 axum-client-ip = "0.6.0"
 ipnetwork = { git = "https://github.com/SildCave/ipnetwork" }
-reqwest = { version = "0.12.7", features = ["blocking", "multipart", "rustls-tls"] }
+reqwest = { version = "0.12.9", features = ["blocking", "multipart", "rustls-tls"] }
 jsonwebtoken = "9.3.0"
 serde_json = "1.0.128"
 chrono = { version = "0.4.38", features = ["serde"] }

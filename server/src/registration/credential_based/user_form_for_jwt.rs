@@ -6,7 +6,8 @@ use crate::auth::{JWTKeys, VerificationError};
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct UserRegistrationFormJWT {
     pub email: String,
-    pub password: String,
+    pub password_hash: String,
+    pub password_salt: String,
     pub date_of_birth: NaiveDate,
 
     pub exp: i64,
@@ -15,13 +16,15 @@ pub struct UserRegistrationFormJWT {
 impl UserRegistrationFormJWT {
     pub fn new(
         email: String,
-        password: String,
+        password_hash: String,
+        password_salt: String,
         date_of_birth: NaiveDate,
         lifetime_s: i64,
     ) -> Self {
         Self {
             email,
-            password,
+            password_hash,
+            password_salt,
             date_of_birth,
             exp: chrono::Utc::now().timestamp() + lifetime_s,
         }

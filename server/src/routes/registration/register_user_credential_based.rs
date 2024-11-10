@@ -1,29 +1,48 @@
 use std::sync::Arc;
 
-use crate::{cloudflare::TurnstileResult, credentials::Password, email::{self, EmailHandler}, registration::CredentialBasedRegistrationPayload, state::RegisterUserCredentialBasedState};
-use axum::{extract::State, http::StatusCode, response::{IntoResponse, Response}, Form};
+use crate::{
+    cloudflare::TurnstileResult,
+    credentials::Password,
+    registration::CredentialBasedRegistrationPayload,
+    state::RegisterUserCredentialBasedState
+};
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::{
+        IntoResponse,
+        Response
+    },
+    Form
+};
 use email_address::EmailAddress;
-use tracing::{error, info};
+use tracing::{
+    error,
+    info
+};
 
-// takes user info and sends jwt through email
+// takes user info and sends jwt through email, function with logging
 pub async fn register_user(
-    State(register_user_credential_based_state): State<Arc<RegisterUserCredentialBasedState>>,
+    State(register_user_credential_based_state):
+        State<Arc<RegisterUserCredentialBasedState>>,
     registration_form: Form<CredentialBasedRegistrationPayload>,
 ) -> Result<Response, Response> {
+    let request_id = uuid::Uuid::new_v4();
+
     let turnstile_state = &register_user_credential_based_state.turnstile_state;
     let email_handler = &register_user_credential_based_state.email_handler;
 
-
+    // chrome gamin 10000Gb ram usage
     let turnstile_result = turnstile_state.verify_turnstile_from_request(
         &registration_form
     ).await.map_err(
         |e| {
-            error!("Error verifying turnstile: {:?}", e);
+            error!("|{}| Error verifying turnstile: {:?}", request_id, e);
             e.into_response()
         }
     )?;
 
-
+    
     info!("turnstile_result: {:?}", turnstile_result);
     if turnstile_result == TurnstileResult::Denied {
         return Ok(
@@ -55,10 +74,9 @@ pub async fn register_user(
     };
 
 
-
     let jwt_encoded_registration_form = registration_form.into_jwt_form(
         email_handler.state.verification_email_state.email_verification_jwt_lifetime_s
-        ).map_err(
+        ).await.map_err(
             |e| {
                 error!("Error creating jwt form: {:?}", e);
                 e.into_response()

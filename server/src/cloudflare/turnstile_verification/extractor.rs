@@ -3,24 +3,10 @@ use super::{
     TurnstileError,
 };
 
-use std::boxed::Box;
-
-use axum::{
-    extract::FromRequest,
-    Form,
-    Json,
-    RequestExt,
-    async_trait,
-    extract::Request,
-    http::header::CONTENT_TYPE
-};
-
 use serde::{
     Deserialize,
     Serialize
 };
-
-use tracing::error;
 
 
 #[derive(Debug, Clone, PartialEq)]

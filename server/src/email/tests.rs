@@ -34,6 +34,7 @@ mod tests {
         let registration_form = UserRegistrationFormJWT::new(
             "123@123.pl".to_string(),
             "123".to_string(),
+            "123".to_string(),
             NaiveDate::from_ymd_opt(2021, 1, 1).unwrap(),
             10
         );
@@ -51,6 +52,7 @@ mod tests {
 
         let registration_form = UserRegistrationFormJWT::new(
             "123@123.pl".to_string(),
+            "123".to_string(),
             "123".to_string(),
             NaiveDate::from_ymd_opt(2021, 1, 1).unwrap(),
             1
