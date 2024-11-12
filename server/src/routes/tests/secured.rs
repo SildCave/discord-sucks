@@ -59,7 +59,7 @@ pub(super) mod tests {
     #[tokio::test]
     #[serial]
     async fn test_secured_endpoint() {
-        let app = get_axum_app().await;
+        let app = get_axum_app(None).await;
         let trace_layer = TraceLayer::new_for_http()
             .make_span_with(DefaultMakeSpan::default().include_headers(true));
         let app = app.layer(
@@ -102,7 +102,7 @@ pub(super) mod tests {
     #[tokio::test]
     #[serial]
     async fn test_secured_endpoint_no_cookie() {
-        let app = get_axum_app().await;
+        let app = get_axum_app(None).await;
         let trace_layer = TraceLayer::new_for_http()
             .make_span_with(DefaultMakeSpan::default().include_headers(true));
         let app = app.layer(
@@ -135,7 +135,7 @@ pub(super) mod tests {
     #[tokio::test]
     #[serial]
     async fn test_secured_endpoint_invalid_cookie() {
-        let app = get_axum_app().await;
+        let app = get_axum_app(None).await;
         let trace_layer = TraceLayer::new_for_http()
             .make_span_with(DefaultMakeSpan::default().include_headers(true));
         let app = app.layer(

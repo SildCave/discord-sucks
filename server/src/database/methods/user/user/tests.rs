@@ -23,6 +23,67 @@ mod tests {
 
     #[tokio::test]
     #[serial]
+    async fn test_postgres_insert_user() -> Result<(), DatabaseError> {
+        let db_client: DatabaseClientWithCaching = get_db_client().await;
+        let user = User {
+            id: 420,
+            email: "test_email".to_string(),
+            ..User::default()
+        };
+        let res = db_client.postgres_delete_user_by_id(420).await;
+        if res.is_err() {
+            match res.err().unwrap() {
+                DatabaseError::UserNotFound(_) => {},
+                e => {
+                    return Err(e);
+                }
+            }
+        }
+        let res = db_client.redis_delete_email("test_email").await;
+        if res.is_err() {
+            match res.err().unwrap() {
+                DatabaseError::RedisError(_) => {},
+                e => {
+                    return Err(e);
+                }
+            }
+        }
+
+        db_client.cached_insert_user(&user).await.unwrap();
+        let user_db = db_client.postgres_get_user_by_id(420).await.unwrap();
+        assert_eq!(user_db, Some(user));
+
+        let res = db_client.redis_get_user_id_by_email(
+            "test_email"
+        ).await;
+        if res.is_err() {
+            match res.err().unwrap() {
+                DatabaseError::RedisError(_) => {},
+                e => {
+                    return Err(e);
+                }
+            }
+        } else {
+            let user_id = res.unwrap();
+            assert_eq!(user_id, Some(420));
+        }
+
+
+        let res = db_client.redis_delete_email("test_email").await;
+        if res.is_err() {
+            match res.err().unwrap() {
+                DatabaseError::RedisError(_) => {},
+                e => {
+                    return Err(e);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
     async fn test_postgres_get_user_by_id() -> Result<(), DatabaseError> {
         let db_client: DatabaseClientWithCaching = get_db_client().await;
         let user = User {
@@ -55,7 +116,7 @@ mod tests {
         let db_client: DatabaseClientWithCaching = get_db_client().await;
         // prepare test
         let user = User {
-            email: Some("test_email".to_string()),
+            email: "test_email".to_string(),
             id: 420,
             ..User::default()
         };

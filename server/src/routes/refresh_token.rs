@@ -19,10 +19,9 @@ use tracing::error;
 use crate::{
     auth::{
         extract_token_from_cookie,
-        verify_token,
         AuthError,
         ClaimType,
-        Claims,
+        AuthClaims,
     },
     state::RefreshState
 };
@@ -39,11 +38,9 @@ pub async fn refresh_token(
         cookies,
         ClaimType::Refresh
     )?;
-
-    let verification_res = verify_token(
+    
+    let verification_res = refresh_state.jwt_keys.verify_token_and_return_claims(
         &bearer_token,
-        &refresh_state.jwt_keys,
-        Some(ClaimType::Refresh)
     ).await;
 
     if verification_res.is_err() {
@@ -52,7 +49,10 @@ pub async fn refresh_token(
         let error = verification_error.into();
         return Err(error);
     }
-    let claims = verification_res.unwrap();
+    let claims: AuthClaims = verification_res.unwrap();
+    if claims.claim_type != ClaimType::Refresh {
+        return Err(AuthError::InvalidToken);
+    }
 
     let user_id = claims.user_id;
 
@@ -77,7 +77,7 @@ pub async fn refresh_token(
         return Err(AuthError::InvalidToken);
     }
 
-    let claims = Claims::new_access(
+    let claims = AuthClaims::new_access(
         refresh_state.jwt_config.access_key_lifetime_s,
         user_id
     );

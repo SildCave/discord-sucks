@@ -5,6 +5,7 @@ use crate::database::{
 
 
 impl DatabaseClientWithCaching {
+    
     pub async fn redis_set_email_by_user_id(
         &self,
         email: &str,
@@ -33,7 +34,7 @@ impl DatabaseClientWithCaching {
             .await?;
         Ok(())
     }
-
+    
     pub async fn redis_get_user_id_by_email(
         &self,
         email: &str

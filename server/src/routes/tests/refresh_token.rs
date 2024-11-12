@@ -43,7 +43,7 @@ pub(super) mod tests {
         let user = User {
             id: 420,
             username: "test_user".to_string(),
-            email: Some("test_user@gmail.com".to_string()),
+            email: "test_email".to_string(),
             password_hash: hash,
             salt: salt_string.to_string(),
             ..User::default()
@@ -59,12 +59,11 @@ pub(super) mod tests {
 
         let (response, status_code) = get_authenticate_endpoint_response_and_status_code(
             test_password.get_password(),
-            user.email.as_ref().unwrap(),
+            &user.email,
             app
         ).await;
         println!("Response1: {}", response);
 
-        
 
         assert_eq!(status_code, 200);
         let response: serde_json::Value = serde_json::from_str(&response).unwrap();
@@ -74,7 +73,7 @@ pub(super) mod tests {
     #[tokio::test]
     #[serial]
     async fn test_refresh_token_endpoint() {
-        let app = get_axum_app().await;
+        let app = get_axum_app(None).await;
         let trace_layer = TraceLayer::new_for_http()
             .make_span_with(DefaultMakeSpan::default().include_headers(true));
         let app = app.layer(
@@ -116,7 +115,7 @@ pub(super) mod tests {
     #[tokio::test]
     #[serial]
     async fn test_refresh_token_endpoint_no_token() {
-        let app = get_axum_app().await;
+        let app = get_axum_app(None).await;
         let trace_layer = TraceLayer::new_for_http()
             .make_span_with(DefaultMakeSpan::default().include_headers(true));
         let app = app.layer(
@@ -150,7 +149,7 @@ pub(super) mod tests {
     #[tokio::test]
     #[serial]
     async fn test_refresh_token_endpoint_invalid_token() {
-        let app = get_axum_app().await;
+        let app = get_axum_app(None).await;
         let trace_layer = TraceLayer::new_for_http()
             .make_span_with(DefaultMakeSpan::default().include_headers(true));
         let app = app.layer(

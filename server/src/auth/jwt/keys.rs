@@ -34,4 +34,17 @@ impl JWTKeys {
         )
     }
 
+    pub fn verify_jwt_token<T>(&self, token: &str) -> Result<T>
+    where
+        T: serde::de::DeserializeOwned,
+    {
+        let token_data = jsonwebtoken::decode::<T>(
+            &token,
+            &self.decoding,
+            &jsonwebtoken::Validation::default(),
+        )?;
+
+        Ok(token_data.claims)
+    }
+
 }

@@ -9,12 +9,12 @@ mod authorization_extractor;
 pub use extractors::extract_token_from_cookie;
 
 pub use claims::{
-    Claims,
+    AuthClaims,
     ClaimType
 };
 
-pub use verification::{
-    verify_token,
-    VerificationError
-};
+pub use verification::VerificationError;
 pub use keys::JWTKeys;
+
+
+

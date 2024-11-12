@@ -1,7 +1,7 @@
 mod authentication;
 
 pub use super::jwt::{
-    Claims,
+    AuthClaims,
     JWTKeys
 };
 

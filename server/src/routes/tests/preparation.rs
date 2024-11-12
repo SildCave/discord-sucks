@@ -41,8 +41,14 @@ mod preparation {
         ).await.unwrap();
         db_client
     }
-    pub async fn get_axum_app() -> axum::Router {
+    pub async fn get_axum_app(
+        custom_config: Option<Config>
+    ) -> axum::Router {
         let mut config = get_config();
+        if let Some(custom_config) = custom_config {
+            config = custom_config;
+        }
+
         // jwt_secret_path = "configuration/server/jwt_secret.txt"
         let mut jwt_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         jwt_path.push("../configuration/server/jwt_secret.txt");

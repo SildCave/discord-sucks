@@ -20,10 +20,18 @@ use secured::secured;
 use authenticate::authenticate;
 
 use crate::{
-    auth::JWTKeys, cloudflare::TurnstileState, configuration::Config, credentials::PasswordRequirements, database::DatabaseClientWithCaching, email::EmailHandler, state::{
+    auth::JWTKeys,
+    cloudflare::TurnstileState,
+    configuration::Config,
+    credentials::PasswordRequirements,
+    database::DatabaseClientWithCaching,
+    email::EmailHandler,
+    state::{
+        AddUserFromJWTTokenState,
         ApiState,
         AuthenticationState,
-        RefreshState, RegisterUserCredentialBasedState
+        RefreshState,
+        RegisterUserCredentialBasedState
     }
 };
 
@@ -53,13 +61,18 @@ pub async fn configure_routes(
         password_requirements: password_requirements.clone(),
     };
 
+    let add_user_from_jwt_token_state = AddUserFromJWTTokenState {
+        db_client: db_client.clone(),
+        jwt_keys: jwt_keys.clone(),
+    };
 
     let api_state = ApiState {
         authentication: Arc::new(authentication_state),
         refresh: Arc::new(refresh_state),
         register_user_credential_based: Arc::new(register_user_credential_based_state),
+        add_user_from_jwt: Arc::new(add_user_from_jwt_token_state),
     };
-    
+
     Router::new()
         .route("/", get(hello_world))
         .route("/authenticate", post(authenticate))
@@ -70,12 +83,7 @@ pub async fn configure_routes(
             .with_state(jwt_keys.clone())
         .route("/register_user", post(registration::register_user))
             .with_state(api_state.clone())
-        .route("/verify_email", post(registration::add_user_from_jwt_token))
+        .route("/verify_email", get(registration::add_user_from_jwt_token))
             .with_state(api_state.clone())
 }
 
-// curl -s \
-//     -w '\n' \
-//     -H 'Content-Type: application/json' \
-//     -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiQGIuY29tIiwiY29tcGFueSI6IkFDTUUiLCJleHAiOjEwMDAwMDAwMDAwfQ.M3LAZmrzUkXDC1q5mSzFAs_kJrwuKz3jOoDmjJ0G4gM' \
-//     http://localhost:3000/protected

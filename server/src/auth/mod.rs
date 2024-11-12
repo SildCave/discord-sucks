@@ -4,7 +4,7 @@ mod authentication;
 mod jwt;
 
 pub use authentication::{
-    Claims,
+    AuthClaims,
     JWTKeys,
     AuthenticationPayload,
     AuthenticationBody,
@@ -13,7 +13,6 @@ pub use authentication::{
 pub use jwt::{
     ClaimType,
     extract_token_from_cookie,
-    verify_token,
     VerificationError
 };
 

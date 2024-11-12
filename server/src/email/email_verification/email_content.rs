@@ -13,7 +13,7 @@ impl EmailHandler{
         let email_author = self.state.verification_email_state.get_verification_email_author_mailbox();
         let body = format!(
             "{}?token={}",
-            "http://localhost:3000/email-verification",
+            "http://localhost:3000/verify_email",
             jwt_encoded_registration_form
         );
         let message = Message::builder()
@@ -28,7 +28,7 @@ impl EmailHandler{
                     e.to_string()
                 )
             )?;
-        
+
         Ok(message)
     }
 }

@@ -9,7 +9,7 @@ use serde_json::json;
 
 use crate::auth::AuthError;
 
-use super::{ClaimType, Claims, JWTKeys};
+use super::{ClaimType, AuthClaims, JWTKeys};
 
 
 use thiserror::Error;
@@ -83,24 +83,21 @@ impl From<jsonwebtoken::errors::Error> for VerificationError {
     }
 }
 
-/// Verifies the signature of the token and returns the claims if the token is valid.
-pub async fn verify_token(
-    token: &str,
-    keys: &JWTKeys,
-    expected_type: Option<ClaimType>
-) -> Result<Claims, VerificationError> {
-    let token_data = decode::<Claims>(
-        token,
-        &keys.decoding,
-        &Validation::new(Algorithm::HS256),
-    )?;
-    println!("Token data: {:?}", token_data);
-    if expected_type.is_none() {
-        return Ok(token_data.claims);
-    }
-    if expected_type.unwrap() != token_data.claims.claim_type {
-        return Err(VerificationError::InvalidToken);
+impl JWTKeys {
+    /// Verifies the signature of the token and returns the claims if the token is valid.
+    pub async fn verify_token_and_return_claims<T>(
+        &self,
+        token: &str,
+    ) -> Result<T, VerificationError>
+    where T: serde::de::DeserializeOwned,
+    {
+        let token_data = decode::<T>(
+            token,
+            &self.decoding,
+            &Validation::new(Algorithm::HS256),
+        )?;
+        Ok(token_data.claims)
     }
 
-    Ok(token_data.claims)
 }
+

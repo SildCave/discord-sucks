@@ -6,7 +6,7 @@ use crate::{
         AuthenticationBody,
         AuthenticationPayload,
         ClaimType,
-        Claims,
+        AuthClaims,
     }, credentials::Password, state::AuthenticationState
 };
 
@@ -94,7 +94,7 @@ pub async fn authenticate(
     // Get password hash from the db
 
 
-    let claims: Claims = Claims::new_refresh(
+    let claims: AuthClaims = AuthClaims::new_refresh(
         authentication_state.jwt_config.refresh_key_lifetime_s,
         user_id
     );

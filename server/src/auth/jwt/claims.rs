@@ -20,7 +20,7 @@ impl ClaimType {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Claims {
+pub struct AuthClaims {
     // Issued at
     pub iat: i64,
     // Token expiration in unix timestamp
@@ -31,7 +31,7 @@ pub struct Claims {
     pub user_id: i64,
 }
 
-impl Claims {
+impl AuthClaims {
     /// Check if claim type is equal to the provided claim type
     pub fn valid_type(&self, claim_type: ClaimType) -> bool {
         self.claim_type == claim_type

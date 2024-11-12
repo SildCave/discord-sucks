@@ -1,13 +1,30 @@
 use std::sync::Arc;
 
-use crate::database::{
+use crate::{app_objects::User, database::{
     methods::DatabaseError,
     DatabaseClientWithCaching
-};
+}};
 
 
 
 impl DatabaseClientWithCaching {
+
+    pub async fn cached_insert_user(
+        &self,
+        user: &User
+    ) -> Result<(), DatabaseError> {
+        let db_client = Arc::new(self.clone());
+        db_client.postgres_insert_user(user).await?;
+
+       
+        db_client.redis_set_email_by_user_id(
+            &user.email,
+            user.id
+        ).await?;
+        
+        Ok(())
+    }
+
     pub async fn cached_get_user_id_by_email(
         &self,
         email: &str

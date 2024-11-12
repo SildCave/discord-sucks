@@ -6,7 +6,7 @@ CREATE TABLE
         username VARCHAR(48) NOT NULL,
         password_hash VARCHAR(256) NOT NULL,
         salt VARCHAR(64) NOT NULL,
-        email VARCHAR(64),
+        email VARCHAR(64) NOT NULL,
         created_at BIGINT NOT NULL,
         valid_refresh_token VARCHAR(1024),
         verified BOOLEAN NOT NULL,

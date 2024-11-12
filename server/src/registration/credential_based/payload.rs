@@ -10,9 +10,11 @@ use crate::cloudflare::{GetTurnstileCode, TurnstileRequest};
 use crate::credentials::{Password, PasswordRequirements, SaltMode};
 use crate::registration::UserRegistrationFormJWT;
 // TODO - Implement OTP 2fa and add date of birth field to the db
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub struct CredentialBasedRegistrationPayload {
     pub email: String,
+    pub username: String,
     pub password: String,
     pub date_of_birth: String,
     #[serde(rename = "cf-turnstile-response")]
@@ -60,6 +62,7 @@ impl CredentialBasedRegistrationPayload {
         )?;
         Ok(UserRegistrationFormJWT::new(
             self.email.clone(),
+            self.username.clone(),
             password.password_hash,
             password.salt,
             date_of_birth,

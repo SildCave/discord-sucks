@@ -16,7 +16,9 @@ impl TurnstileState {
         &self,
         cf_turnstile_response: &String,
     ) -> Result<TurnstileResult, TurnstileError> {
-
+        if self.allow_invalid_turnstile {
+            return Ok(TurnstileResult::Allowed);
+        }
         let form = Form::new()
             .text("response", cf_turnstile_response.clone())
             .text("secret", self.secret_key);

@@ -1,5 +1,6 @@
 mod user;
 
+use axum::response::IntoResponse;
 use thiserror::Error;
 
 use crate::auth::AuthError;
@@ -18,6 +19,36 @@ pub enum DatabaseError {
     UserNotFound(i64),
     #[error("User with id: {0} already exists")]
     UserAlreadyExists(i64),
+}
+
+impl IntoResponse for DatabaseError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, error_message) = match self {
+            DatabaseError::SQLXError(_) => {
+                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, "1200")
+            },
+            DatabaseError::RedisError(_) => {
+                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, "1201")
+            },
+            DatabaseError::UUIDError(_) => {
+                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, "1202")
+            },
+            DatabaseError::TokioError(_) => {
+                (axum::http::StatusCode::INTERNAL_SERVER_ERROR, "1203")
+            },
+            DatabaseError::UserNotFound(_) => {
+                (axum::http::StatusCode::NOT_FOUND, "1204")
+            },
+            DatabaseError::UserAlreadyExists(_) => {
+                (axum::http::StatusCode::BAD_REQUEST, "1205")
+            },
+        };
+
+        axum::http::Response::builder()
+            .status(status)
+            .body(error_message.into())
+            .unwrap()
+    }
 }
 
 impl DatabaseError {
